@@ -103,6 +103,6 @@ def create_label_data(trainPath, word_dict, file_list):
                             file_des.write(w + "\tU\n")
                 file_des.write("\n")
 
-        log.info(u"加载数据" + "--->" + str(file_src) + "--->OK")
+        logger.info(u"加载数据" + "--->" + str(file_src) + "--->OK")
 
     file_des.close()

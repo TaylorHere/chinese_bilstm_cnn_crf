@@ -9,7 +9,7 @@ metadata:
   generateName: builder-trainer-
 spec:
   entrypoint: builder-trainer
-  onExit: onExit
+  # onExit: onExit
   arguments:
     parameters:
     - name: repo
@@ -22,6 +22,8 @@ spec:
       value: taylor
     - name: image
       value: bilstm_crf_keras
+    - name: tag
+      value: latest
     - name: dockerfile
       value: Dockerfile
     - name: train-data-mount-path
@@ -45,8 +47,20 @@ spec:
               template: puller
           - - name: builder
               template: builder
+              arguments:
+                parameters:
+                - name: image
+                  value: "{{workflow.parameters.image}}"
+                - name: tag
+                  value: "{{workflow.name}}"
           - - name: submiter
               template: submiter
+              arguments:
+                parameters:
+                - name: image
+                  value: "{{workflow.parameters.image}}"
+                - name: tag
+                  value: "{{workflow.name}}"
 
     - name: puller
       retryStrategy: {}
@@ -66,13 +80,17 @@ spec:
 
 
     - name: builder
+      inputs:
+        parameters:
+        - name: image
+        - name: tag
       retryStrategy: {}
       container:
         image: registry.cn-hangzhou.aliyuncs.com/taylor/kaniko:latest
         args: [
           "--dockerfile={{workflow.parameters.dockerfile}}",
           "--context=dir:///tmp/git/{{workflow.parameters.local}}",
-          "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
+          "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{inputs.parameters.image}}:{{inputs.parameters.tag}}",
           "--cache=true",
           "--cache-dir=/tmp/builder/cache",
         ]
@@ -83,6 +101,12 @@ spec:
             mountPath: /tmp/
 
     - name: submiter
+      inputs:
+        parameters:
+        - name: image
+          value: "{{workflow.parameters.image}}"
+        - name: tag
+          value: latest
       resource:
         action: create
         successCondition: status.succeeded > 0
@@ -91,7 +115,7 @@ spec:
             apiVersion: batch/v1
             kind: Job
             metadata:
-                name: trainer-job-{{workflow.name}}
+                name: job-on-eci-of-{{workflow.name}}
                 ownerReferences:
                 - apiVersion: argoproj.io/v1alpha1
                   blockOwnerDeletion: true
@@ -102,7 +126,8 @@ spec:
               template:
                 metadata:
                   annotations:
-                    k8s.aliyun.com/eci-gpu-type : "{{workflow.parameters.gpu-type}}"
+                    k8s.aliyun.com/eci-gpu-type: "{{workflow.parameters.gpu-type}}"
+                    k8s.aliyun.com/eci-image-cache: "true"
                   name: trainer-job
                 spec:
                   restartPolicy: Never
@@ -116,10 +141,12 @@ spec:
                     resources:
                       limits:
                           nvidia.com/gpu: "{{workflow.parameters.gpu-limits}}"
-                    image: "{{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}"
+                    image: "{{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{inputs.parameters.image}}:{{inputs.parameters.tag}}"
                     command:
                       - python
                       - train.py
+                      - --corpus_path
+                      - /home/jovyan/shared/corpus/2014/
                     volumeMounts:
                       - name: workdir
                         mountPath: "{{workflow.parameters.train-data-mount-path}}"

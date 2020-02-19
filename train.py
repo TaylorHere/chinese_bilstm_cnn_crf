@@ -28,7 +28,7 @@ from keras.callbacks import ModelCheckpoint
 from paths import TrainPath
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--corpus_path", help="corpus path", default="/home/jovyan/shared/corpus", type=str)
+parser.add_argument("--corpus_path", help="corpus path", default="/home/jovyan/shared/corpus/2014/", type=str)
 parser.add_argument("--batch_size", help="batch size", default=256, type=int)
 parser.add_argument("--epochs", help="epochs", default=3, type=int)
 parser.add_argument(
