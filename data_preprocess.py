@@ -181,11 +181,11 @@ class DataPreprocess():
 
     def padding_sentences(self, max_len):
 
-        data_index = codecs.open(self.trainPath.data_index_path, "r", "utf-8")
-        label_index = codecs.open(self.trainPath.label_index_path, "w", "utf-8")
+        data_index = codecs.open(self.trainPath.data_index_path, "rw", "utf-8")
+        label_index = codecs.open(self.trainPath.label_index_path, "rw", "utf-8")
 
-        data_index_padding = codecs.open(self.trainPath.data_index_padding_path, "w", "utf-8")
-        label_index_padding = codecs.open(self.trainPath.label_index_padding_path, "w", "utf-8")
+        data_index_padding = codecs.open(self.trainPath.data_index_padding_path, "rw", "utf-8")
+        label_index_padding = codecs.open(self.trainPath.label_index_padding_path, "rw", "utf-8")
 
         data_line = data_index.readline()
 
