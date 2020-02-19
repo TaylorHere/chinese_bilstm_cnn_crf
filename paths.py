@@ -17,7 +17,7 @@ class TrainPath(object):
         )
 
         model_basepath = os.path.join(train_dir, "model")
-        if not os.path.exists():
+        if not os.path.exists(model_basepath):
             os.makedirs(model_basepath)
         model_vector_path = os.path.join(model_basepath, "model_vector_people.m")
         model_vector_text_path = os.path.join(model_basepath, "model_vector_people.txt")
