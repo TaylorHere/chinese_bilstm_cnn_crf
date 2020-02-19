@@ -187,28 +187,28 @@ class DataPreprocess():
         data_index_padding = codecs.open(self.trainPath.data_index_padding_path, "w", "utf-8")
         label_index_padding = codecs.open(self.trainPath.label_index_padding_path, "w", "utf-8")
 
-#         data_line = data_index.readline()
+        data_line = data_index.readline()
 
-#         while data_line:
+        while data_line:
 
-#             book_data = data_line.strip().split()
+            book_data = data_line.strip().split()
 
-#             book_data_len = len(book_data)
+            book_data_len = len(book_data)
 
-#             new_book_data = []
+            new_book_data = []
 
-#             if book_data_len < max_len:
-#                 new_book_data = [str(0)] * (max_len - book_data_len) + book_data
-#             else:
-#                 new_book_data = book_data
+            if book_data_len < max_len:
+                new_book_data = [str(0)] * (max_len - book_data_len) + book_data
+            else:
+                new_book_data = book_data
 
-#             for data_word in new_book_data:
+            for data_word in new_book_data:
 
-#                 data_index_padding.write(data_word + "\t")
+                data_index_padding.write(data_word + "\t")
 
-#             data_index_padding.write("\n")
+            data_index_padding.write("\n")
 
-#             data_line = data_index.readline()
+            data_line = data_index.readline()
 
         label_line = label_index.readline()
 
