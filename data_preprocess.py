@@ -10,7 +10,7 @@ import numpy as np
 
 class DataPreprocess():
 
-    def __init__(self, rainPath):
+    def __init__(self, trainPath):
         self.trainPath = trainPath
 
     def create_documents(self):
