@@ -13,7 +13,7 @@ spec:
   arguments:
     parameters:
     - name: repo
-      value: github.com/TaylorHere/chinese_bilstm_cnn_crf.git
+      value: https://github.com/TaylorHere/chinese_bilstm_cnn_crf.git
     - name: local
       value: bilstm_crf_keras
     - name: registry
