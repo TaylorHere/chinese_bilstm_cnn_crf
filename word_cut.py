@@ -14,10 +14,10 @@ from bilstm_cnn_crf import bilstm_cnn_crf
 
 
 class WordCut:
-    def __init__(self):
+    def __init__(self, trainPath):
 
         model, lexicon, sequence_max_length = self.load_params()
-
+        self.trainPath = trainPath
         self.model = model
         self.lexicon = lexicon
         self.sequence_max_length = sequence_max_length
@@ -66,7 +66,7 @@ class WordCut:
     def load_params(self):
 
         sequence_max_length, embedding_size, useful_word_length, label_2_index_length = pickle.load(
-            open("model/model_params.pkl", "rb")
+            open(self.trainPath.model_params_path, "rb")
         )
 
         model = bilstm_cnn_crf(
@@ -77,9 +77,9 @@ class WordCut:
             is_train=False,
         )
 
-        model.load_weights("model/train_model.hdf5")
+        model.load_weights(self.trainPath.weights_path)
 
-        lexicon, index_2_label = pickle.load(open("model/lexicon.pkl", "rb"))
+        lexicon, index_2_label = pickle.load(open(self.trainPath.lexicon_path, "rb"))
 
         return model, lexicon, sequence_max_length
 

@@ -71,7 +71,7 @@ def single_word_filter(word_list):
     return new_word_list
 
 
-def create_label_data(word_dict, file_list, trainPath):
+def create_label_data(trainPath, word_dict, file_list):
 
     file_des = codecs.open(trainPath.train_data_path, "w", "utf-8")
 

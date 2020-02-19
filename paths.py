@@ -25,4 +25,4 @@ class TrainPath(object):
         checkpoints_path = os.path.join(checkpoints_basepath, "weights.best.hdf5")
         weights_path = os.path.join(model_basepath, "train_model.hdf5")
         lexicon_path = os.path.join(model_basepath, "lexicon.pkl")
-        model_params_path = os.path.join(trainPath.model_basepath, "model_params.pkl")
+        model_params_path = os.path.join(model_basepath, "model_params.pkl")
