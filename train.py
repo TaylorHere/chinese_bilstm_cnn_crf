@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 from log import setUpLogger
 
-from data_create import create_label_data
+from data_create import create_label_data, path_flatten
 
 from data_preprocess import DataPreprocess
 
@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--corpus_path", help="corpus path", default="/home/jovyan/shared/corpus/2014/", type=str)
 parser.add_argument("--batch_size", help="batch size", default=256, type=int)
 parser.add_argument("--epochs", help="epochs", default=3, type=int)
+parser.add_argument("--use_cache_train_data", default=false, type=bool)
 parser.add_argument(
     "--train_dir", help="train directory", default="/home/jovyan/shared/", type=str
 )
@@ -57,13 +58,9 @@ def run():
 
     logger.info("step-2--->" + u"语料格式转换,加标注生成标准文件" + "--->START")
 
-    raw_train_file = [
-        os.sep.join([corpus_path, main_path, sub_path])
-        for main_path in os.listdir(corpus_path)
-        for sub_path in os.listdir(corpus_path + os.sep + main_path)
-    ]
-
-    create_label_data(trainPath, word_dict, raw_train_file)
+    if not args.use_cache_train_data:
+        raw_train_file = path_flatten(corpus_path)
+        create_label_data(trainPath, word_dict, raw_train_file)
 
     logger.info("step-3--->" + u"按标点符号或是空格存储文件" + "--->START")
 

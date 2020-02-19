@@ -106,3 +106,17 @@ def create_label_data(trainPath, word_dict, file_list):
         logger.info(u"加载数据" + "--->" + str(file_src) + "--->OK")
 
     file_des.close()
+
+    
+def path_flatten(path, includes=['.txt']):
+    paths = []
+    for subpath in os.listdir(path):
+        for include in includes:
+            relpath = os.path.join(path, subpath)
+            if os.path.isfile(relpath) and include == 'any':
+                paths.append(relpath)
+            elif os.path.isfile(relpath) and relpath.endswith(include):
+                paths.append(relpath)
+            elif os.path.isdir(relpath):
+                paths += path_flatten(relpath, includes=includes)
+    return paths
