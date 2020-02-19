@@ -57,7 +57,7 @@ spec:
             - >-
                 if cd /tmp/git/{{workflow.parameters.local}};
                 then git pull;
-                else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git /tmp/git/{{workflow.parameters.local}};
+                else git clone {{workflow.parameters.repo}} /tmp/git/{{workflow.parameters.local}};
                 fi && 
                 tar  -C /tmp/git/{{workflow.parameters.local}} -zcvf /tmp/git/{{workflow.parameters.local}}/context.tar.gz .
         volumeMounts:
