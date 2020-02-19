@@ -22,7 +22,7 @@ class TrainPath(object):
         self.model_vector_path = os.path.join(self.model_basepath, "model_vector_people.m")
         self.model_vector_text_path = os.path.join(self.model_basepath, "model_vector_people.txt")
         self.checkpoints_basepath = os.path.join(self.model_basepath, "checkpoints")
-        self.checkpoints_path = os.path.join(checkpoints_basepath, "weights.best.hdf5")
+        self.checkpoints_path = os.path.join(self.checkpoints_basepath, "weights.best.hdf5")
         self.weights_path = os.path.join(self.model_basepath, "train_model.hdf5")
         self.lexicon_path = os.path.join(self.model_basepath, "lexicon.pkl")
         self.model_params_path = os.path.join(self.model_basepath, "model_params.pkl")
