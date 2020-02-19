@@ -14,7 +14,7 @@ from keras.layers import ZeroPadding1D
 from keras.layers import Conv1D
 from keras.layers import Dense
 from keras.layers import TimeDistributed
-from keras.layers import merge
+from keras.layers import Concatenate
 
 from keras_contrib.layers import CRF
 
@@ -65,7 +65,7 @@ def bilstm_cnn_crf(
     conv_dense = TimeDistributed(Dense(filter_kernel_number))(conv_drop)
 
     # merge
-    rnn_cnn_merge = merge([bilstm_dense, conv_dense], mode="concat", concat_axis=2)
+    rnn_cnn_merge = Concatenate(axis=2)([bilstm_dense, conv_dense])
     dense = TimeDistributed(Dense(class_label_count))(rnn_cnn_merge)
 
     # crf

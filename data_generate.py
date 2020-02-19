@@ -21,8 +21,8 @@ def generate_batch(trainPath, batch_size=None, label_class=None):
 
     while True:
 
-        data_index_padding = codecs.open(trainPath.data_index_padding, "r", "utf-8")
-        label_index_padding = codecs.open(trainPath.label_index_padding, "r", "utf-8")
+        data_index_padding = codecs.open(trainPath.data_index_padding_path, "r", "utf-8")
+        label_index_padding = codecs.open(trainPath.label_index_padding_path, "r", "utf-8")
 
         data_line = data_index_padding.readline()
         label_line = label_index_padding.readline()

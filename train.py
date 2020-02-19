@@ -33,6 +33,7 @@ parser.add_argument("--batch_size", help="batch size", default=256, type=int)
 parser.add_argument("--epochs", help="epochs", default=3, type=int)
 parser.add_argument("--use_cache_train_data", default=false, type=bool)
 parser.add_argument("--max_len", default=306, type=int)
+parser.add_argument("--documents_length", default=2531574, type=int)
 parser.add_argument(
     "--train_dir", help="train directory", default="/home/jovyan/shared/", type=str
 )
@@ -69,7 +70,7 @@ def run():
         logger.info("step-3--->" + u"按标点符号或是空格存储文件" + "--->START")
         
         documents_length = dataPreprocess.create_documents()
-
+    documents_length = args.documents_length
     logger.info("step-4--->" + u"对语料中的词统计排序生成索引" + "--->START")
 
     lexicon, lexicon_reverse = dataPreprocess.create_lexicon(word_dict)
@@ -107,7 +108,8 @@ def run():
         embedding_weights,
     )
     logger.info("setp-9.1--->" + "加载模型" + "--->START")
-    model.load_weights(trainPath.checkpoints_path)
+    if os.path.exists(trainPath.checkpoints_path):
+        model.load_weights(trainPath.checkpoints_path)
     logger.info("step-10--->" + u"模型训练" + "--->START")
 
     if batch_size > documents_length:
@@ -126,6 +128,7 @@ def run():
 
     _ = model.fit_generator(
         generator=generate_batch(
+            trainPath=trainPath,
             batch_size=batch_size, label_class=label_2_index_length
         ),
         steps_per_epoch=int(documents_length / batch_size),
