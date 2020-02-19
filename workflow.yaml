@@ -1,0 +1,134 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nas-pvc
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: builder-trainer-
+spec:
+  entrypoint: builder-trainer
+  onExit: onExit
+  arguments:
+    parameters:
+    - name: repo
+      value: github.com/TaylorHere/chinese_bilstm_cnn_crf.git
+    - name: local
+      value: bilstm_crf_keras
+    - name: registry
+      value: registry.cn-hangzhou.aliyuncs.com
+    - name: project
+      value: taylor
+    - name: image
+      value: bilstm_crf_keras
+    - name: dockerfile
+      value: Dockerfile
+    - name: train-data-mount-path
+      value: /home/jovyan/shared/
+    - name: gpu-type
+      value: T4
+    - name: gpu-limits
+      value: 1
+  volumes:
+    - name: workdir
+      persistentVolumeClaim:
+        claimName: nas-pvc
+    - name: docker-config
+      configMap:
+        name: docker-config
+
+  templates:
+    - name: builder-trainer
+      steps:
+          - - name: puller
+              template: puller
+          - - name: builder
+              template: builder
+          - - name: submiter
+              template: submiter
+
+    - name: puller
+      retryStrategy: {}
+      container:
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/git:latest
+        command: ['sh', '-c']
+        args:
+            - >-
+                if cd /tmp/git/{{workflow.parameters.local}};
+                then git pull;
+                else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git /tmp/git/{{workflow.parameters.local}};
+                fi && 
+                tar  -C /tmp/git/{{workflow.parameters.local}} -zcvf /tmp/git/{{workflow.parameters.local}}/context.tar.gz .
+        volumeMounts:
+          - name: workdir
+            mountPath: /tmp/
+
+
+    - name: builder
+      retryStrategy: {}
+      container:
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/kaniko:latest
+        args: [
+          "--dockerfile={{workflow.parameters.dockerfile}}",
+          "--context=dir:///tmp/git/{{workflow.parameters.local}}",
+          "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
+          "--cache=true",
+          "--cache-dir=/tmp/builder/cache",
+        ]
+        volumeMounts:
+          - name: docker-config
+            mountPath: /kaniko/.docker/
+          - name: workdir
+            mountPath: /tmp/
+
+    - name: submiter
+      resource:
+        action: create
+        successCondition: status.succeeded > 0
+        failureCondition: status.failed > 0
+        manifest: |
+            apiVersion: batch/v1
+            kind: Job
+            metadata:
+                name: trainer-job-{{workflow.name}}
+                ownerReferences:
+                - apiVersion: argoproj.io/v1alpha1
+                  blockOwnerDeletion: true
+                  kind: Workflow
+                  name: "{{workflow.name}}"
+                  uid: "{{workflow.uid}}"
+            spec:
+              template:
+                metadata:
+                  annotations:
+                    k8s.aliyun.com/eci-gpu-type : "{{workflow.parameters.gpu-type}}"
+                  name: trainer-job
+                spec:
+                  restartPolicy: Never
+                  volumes:
+                    - name: workdir
+                      persistentVolumeClaim:
+                        claimName: nas-pvc
+                  containers:
+                  - name: trainer-job
+                    imagePullPolicy: IfNotPresent
+                    resources:
+                      limits:
+                          nvidia.com/gpu: "{{workflow.parameters.gpu-limits}}"
+                    image: "{{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}"
+                    command:
+                      - python
+                      - train.py
+                    volumeMounts:
+                      - name: workdir
+                        mountPath: "{{workflow.parameters.train-data-mount-path}}"
+
+    - name: onExit
+      resource:
+        action: delete
+        manifest: |
+            apiVersion: batch/v1
+            kind: Job
+            metadata:
+                name: trainer-job-{{workflow.name}}

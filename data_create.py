@@ -7,6 +7,9 @@ Created on Fri May  4 21:38:29 2018
 
 import re
 import codecs
+import logging
+log = logging.getLogger("train_logger")
+
 
 def number_to_character(word):
     """数字转换为中文,但是未考虑实际大小"""
@@ -32,7 +35,8 @@ def number_to_character(word):
         return u"九"
     else:
         return word
-        
+
+
 def special_charater_filter(word):
     """过滤形如  的 后面的承接字 """
     new_word = ""
@@ -41,16 +45,16 @@ def special_charater_filter(word):
         noice_word = word_match.group(0).replace(u"的", "")
         new_word = word.replace(noice_word, "")
         return new_word
-        
+
     return word
 
-  
+
 def single_word_filter(word_list):
-    
+
     new_word_list = []
-    
+
     for w in word_list:
-        
+
         new_word = ""
         w = special_charater_filter(w)
 
@@ -60,16 +64,16 @@ def single_word_filter(word_list):
             if new_sub_word:
                 new_sub_word = new_sub_word.group(0)
                 new_word += new_sub_word
-                
+
         if new_word:
             new_word_list.append(new_word)
-            
+
     return new_word_list
 
 
-def create_label_data(word_dict, file_list):
-    
-    file_des = codecs.open("data/train.data", "w", "utf-8")
+def create_label_data(word_dict, file_list, trainPath):
+
+    file_des = codecs.open(trainPath.train_data_path, "w", "utf-8")
 
     for file_src in file_list:
         with codecs.open(file_src, "r", "utf-8") as infile:
@@ -99,7 +103,6 @@ def create_label_data(word_dict, file_list):
                             file_des.write(w + "\tU\n")
                 file_des.write("\n")
 
-        print(u"加载数据" + "--->" + str(file_src) + "--->OK")
-                
+        log.info(u"加载数据" + "--->" + str(file_src) + "--->OK")
+
     file_des.close()
-    

@@ -7,7 +7,7 @@ Created on Fri May  4 21:23:30 2018
 
 import numpy as np
 
-'''
+"""
 def pad_sequences(sequences, maxlen=None):
     new_sequences = []
 
@@ -22,12 +22,13 @@ def pad_sequences(sequences, maxlen=None):
             new_sequences.append(one)
             
     return np.array(new_sequences)
-'''
+"""
 
 # from keras.preprocessing import sequence
 # sequence.pad_sequences(...)
-def pad_sequences(sequences, maxlen=None, dtype='int32',
-                  padding='pre', truncating='pre', value=0.):
+def pad_sequences(
+    sequences, maxlen=None, dtype="int32", padding="pre", truncating="pre", value=0.0
+):
     """Pads sequences to the same length.
 
     This function transforms a list of
@@ -64,13 +65,15 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         ValueError: In case of invalid values for `truncating` or `padding`,
             or in case of invalid shape for a `sequences` entry.
     """
-    if not hasattr(sequences, '__len__'):
-        raise ValueError('`sequences` must be iterable.')
+    if not hasattr(sequences, "__len__"):
+        raise ValueError("`sequences` must be iterable.")
     lengths = []
     for x in sequences:
-        if not hasattr(x, '__len__'):
-            raise ValueError('`sequences` must be a list of iterables. '
-                             'Found non-iterable: ' + str(x))
+        if not hasattr(x, "__len__"):
+            raise ValueError(
+                "`sequences` must be a list of iterables. "
+                "Found non-iterable: " + str(x)
+            )
         lengths.append(len(x))
 
     num_samples = len(sequences)
@@ -90,29 +93,31 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
     for idx, s in enumerate(sequences):
         if not len(s):
             continue  # empty list/array was found
-        if truncating == 'pre':
+        if truncating == "pre":
             trunc = s[-maxlen:]
-        elif truncating == 'post':
+        elif truncating == "post":
             trunc = s[:maxlen]
         else:
-            raise ValueError('Truncating type "%s" '
-                             'not understood' % truncating)
+            raise ValueError('Truncating type "%s" ' "not understood" % truncating)
 
         # check `trunc` has expected shape
         trunc = np.asarray(trunc, dtype=dtype)
         if trunc.shape[1:] != sample_shape:
-            raise ValueError('Shape of sample %s of sequence at position %s '
-                             'is different from expected shape %s' %
-                             (trunc.shape[1:], idx, sample_shape))
+            raise ValueError(
+                "Shape of sample %s of sequence at position %s "
+                "is different from expected shape %s"
+                % (trunc.shape[1:], idx, sample_shape)
+            )
 
-        if padding == 'post':
-            x[idx, :len(trunc)] = trunc
-        elif padding == 'pre':
-            x[idx, -len(trunc):] = trunc
+        if padding == "post":
+            x[idx, : len(trunc)] = trunc
+        elif padding == "pre":
+            x[idx, -len(trunc) :] = trunc
         else:
             raise ValueError('Padding type "%s" not understood' % padding)
 
     return x
+
 
 # from keras.utils import np_utils
 # np_utils.to_categorical(...)
@@ -129,7 +134,7 @@ def to_categorical(y, num_classes=None):
     # Returns
         A binary matrix representation of the input.
     """
-    y = np.array(y, dtype='int')
+    y = np.array(y, dtype="int")
     input_shape = y.shape
     if input_shape and input_shape[-1] == 1 and len(input_shape) > 1:
         input_shape = tuple(input_shape[:-1])
@@ -142,4 +147,3 @@ def to_categorical(y, num_classes=None):
     output_shape = input_shape + (num_classes,)
     categorical = np.reshape(categorical, output_shape)
     return categorical
-    
