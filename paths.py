@@ -26,3 +26,11 @@ class TrainPath(object):
         self.weights_path = os.path.join(self.model_basepath, "train_model.hdf5")
         self.lexicon_path = os.path.join(self.model_basepath, "lexicon.pkl")
         self.model_params_path = os.path.join(self.model_basepath, "model_params.pkl")
+
+        self.log_basepath = os.path.join(train_dir, "log")
+        if not os.path.exists(self.log_basepath):
+            os.makedirs(self.log_basepath)
+        self.info_log_path = os.path.join(self.log_basepath, 'info')
+        self.error_log_path = os.path.join(self.log_basepath, 'error')
+        self.debug_log_path = os.path.join(self.log_basepath, 'debug')
+        self.warning_log_path = os.path.join(self.log_basepath, 'warning')

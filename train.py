@@ -11,6 +11,10 @@ import gensim
 import pickle
 import logging
 
+logger = logging.getLogger(__name__)
+
+from log import setUpLogger
+
 from data_create import create_label_data
 
 from data_preprocess import DataPreprocess
@@ -24,7 +28,7 @@ from keras.callbacks import ModelCheckpoint
 from paths import TrainPath
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--corpus_path", help="corpus path", default="corpus", type=str)
+parser.add_argument("--corpus_path", help="corpus path", default="/home/jovyan/shared/corpus", type=str)
 parser.add_argument("--batch_size", help="batch size", default=256, type=int)
 parser.add_argument("--epochs", help="epochs", default=3, type=int)
 parser.add_argument(
@@ -38,20 +42,20 @@ epochs = args.epochs
 
 trainPath = TrainPath(args.train_dir)
 
+setUpLogger(trainPath)
 dataPreprocess = DataPreprocess(trainPath)
-log = logging.getLogger("train_logger")
 
 
 def run():
 
-    log.info("step-1--->" + u"加载词向量模型" + "--->START")
+    logger.info("step-1--->" + u"加载词向量模型" + "--->START")
     embedding_model = gensim.models.Word2Vec.load(trainPath.model_vector_path)
 
     word_dict = dataPreprocess.create_useful_words(embedding_model)
 
     embedding_size = embedding_model.vector_size
 
-    log.info("step-2--->" + u"语料格式转换,加标注生成标准文件" + "--->START")
+    logger.info("step-2--->" + u"语料格式转换,加标注生成标准文件" + "--->START")
 
     raw_train_file = [
         os.sep.join([corpus_path, main_path, sub_path])
@@ -61,37 +65,37 @@ def run():
 
     create_label_data(trainPath, word_dict, raw_train_file)
 
-    log.info("step-3--->" + u"按标点符号或是空格存储文件" + "--->START")
+    logger.info("step-3--->" + u"按标点符号或是空格存储文件" + "--->START")
 
     documents_length = dataPreprocess.create_documents()
 
-    log.info("step-4--->" + u"对语料中的词统计排序生成索引" + "--->START")
+    logger.info("step-4--->" + u"对语料中的词统计排序生成索引" + "--->START")
 
     lexicon, lexicon_reverse = dataPreprocess.create_lexicon(word_dict)
 
-    log.info("step-5--->" + u"对所有的词创建词向量" + "--->START")
+    logger.info("step-5--->" + u"对所有的词创建词向量" + "--->START")
 
     useful_word_length, embedding_weights = dataPreprocess.create_embedding(
         embedding_model, embedding_size, lexicon_reverse
     )
 
-    log.info("step-6--->" + u"生成标注以及索引" + "--->START")
+    logger.info("step-6--->" + u"生成标注以及索引" + "--->START")
 
     label_2_index = dataPreprocess.create_label_index()
 
     label_2_index_length = len(label_2_index)
 
-    log.info("step-7--->" + u"将语料中每一句和label进行索引编码" + "--->START")
+    logger.info("step-7--->" + u"将语料中每一句和label进行索引编码" + "--->START")
 
     dataPreprocess.create_matrix(lexicon, label_2_index)
 
-    log.info("step-8--->" + u"将语料中每一句和label以最大长度统一长度,不足补零" + "--->START")
+    logger.info("step-8--->" + u"将语料中每一句和label以最大长度统一长度,不足补零" + "--->START")
 
     max_len = dataPreprocess.maxlen_2d_list()
 
     dataPreprocess.padding_sentences(max_len)
 
-    log.info("step-9--->" + u"模型创建" + "--->START")
+    logger.info("step-9--->" + u"模型创建" + "--->START")
 
     model = bilstm_cnn_crf(
         max_len,
@@ -100,13 +104,13 @@ def run():
         embedding_size,
         embedding_weights,
     )
-    log.info("setp-9.1--->" + "加载模型" + "--->START")
+    logger.info("setp-9.1--->" + "加载模型" + "--->START")
     model.load_weights(trainPath.checkpoints_path)
-    log.info("step-10--->" + u"模型训练" + "--->START")
+    logger.info("step-10--->" + u"模型训练" + "--->START")
 
     if batch_size > documents_length:
 
-        log.info("ERROR--->" + u"语料数据量过少，请再添加一些")
+        logger.info("ERROR--->" + u"语料数据量过少，请再添加一些")
 
         return None
 
@@ -129,7 +133,7 @@ def run():
         callbacks=[checkpoint],
     )
 
-    log.info("step-11--->" + u"模型和字典保存" + "--->START")
+    logger.info("step-11--->" + u"模型和字典保存" + "--->START")
 
     model.save_weights(trainPath.weights_path)
 
@@ -142,17 +146,17 @@ def run():
         open(trainPath.model_params_path, "wb"),
     )
 
-    log.info("step-12--->" + u"打印恢复模型的重要参数" + "--->START")
+    logger.info("step-12--->" + u"打印恢复模型的重要参数" + "--->START")
 
-    log.info("sequence_max_length: " + str(max_len))
+    logger.info("sequence_max_length: " + str(max_len))
 
-    log.info("embedding size: " + str(embedding_size))
+    logger.info("embedding size: " + str(embedding_size))
 
-    log.info("useful_word_length: " + str(useful_word_length + 2))
+    logger.info("useful_word_length: " + str(useful_word_length + 2))
 
-    log.info("label_2_index_length: " + str(label_2_index_length))
+    logger.info("label_2_index_length: " + str(label_2_index_length))
 
-    log.info(u"训练完成" + "--->OK")
+    logger.info(u"训练完成" + "--->OK")
 
 
 if __name__ == "__main__":

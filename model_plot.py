@@ -16,7 +16,7 @@ import argparse
 from paths import TrainPath
 
 import logging
-log = logging.getLogger("train_logger")
+logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ Created on Fri May  4 21:38:29 2018
 import re
 import codecs
 import logging
-log = logging.getLogger("train_logger")
+logger = logging.getLogger(__name__)
 
 
 def number_to_character(word):
