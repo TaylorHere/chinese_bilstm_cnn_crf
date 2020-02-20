@@ -22,8 +22,9 @@ class Yogi(Optimizer):
     please add 'cc @MarcoAndreaBuchmann' to notify him.
     """
 
-    def __init__(self, lr=0.01, beta_1=0.9, beta_2=0.999,
-                 epsilon=1e-3, decay=0., **kwargs):
+    def __init__(
+        self, lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-3, decay=0.0, **kwargs
+    ):
         super(Yogi, self).__init__(**kwargs)
         if beta_1 <= 0 or beta_1 >= 1:
             raise ValueError("beta_1 has to be in ]0, 1[")
@@ -31,11 +32,11 @@ class Yogi(Optimizer):
             raise ValueError("beta_2 has to be in ]0, 1[")
 
         with K.name_scope(self.__class__.__name__):
-            self.iterations = K.variable(0, dtype='int64', name='iterations')
-            self.lr = K.variable(lr, name='lr')
-            self.beta_1 = K.variable(beta_1, name='beta_1')
-            self.beta_2 = K.variable(beta_2, name='beta_2')
-            self.decay = K.variable(decay, name='decay')
+            self.iterations = K.variable(0, dtype="int64", name="iterations")
+            self.lr = K.variable(lr, name="lr")
+            self.beta_1 = K.variable(beta_1, name="beta_1")
+            self.beta_2 = K.variable(beta_2, name="beta_2")
+            self.decay = K.variable(decay, name="decay")
         if epsilon is None:
             epsilon = K.epsilon()
         if epsilon <= 0:
@@ -49,12 +50,14 @@ class Yogi(Optimizer):
 
         lr = self.lr
         if self.initial_decay > 0:
-            lr = lr * (1. / (1. + self.decay * K.cast(self.iterations,
-                                                      K.dtype(self.decay))))
+            lr = lr * (
+                1.0 / (1.0 + self.decay * K.cast(self.iterations, K.dtype(self.decay)))
+            )
 
         t = K.cast(self.iterations, K.floatx()) + 1
-        lr_t = lr * (K.sqrt(1. - K.pow(self.beta_2, t)) /
-                     (1. - K.pow(self.beta_1, t)))
+        lr_t = lr * (
+            K.sqrt(1.0 - K.pow(self.beta_2, t)) / (1.0 - K.pow(self.beta_1, t))
+        )
 
         ms = [K.zeros(K.int_shape(p), dtype=K.dtype(p)) for p in params]
         vs = [K.zeros(K.int_shape(p), dtype=K.dtype(p)) for p in params]
@@ -63,8 +66,8 @@ class Yogi(Optimizer):
 
         for p, g, m, v, vhat in zip(params, grads, ms, vs, vhats):
             g2 = K.square(g)
-            m_t = (self.beta_1 * m) + (1. - self.beta_1) * g
-            v_t = v - (1. - self.beta_2) * K.sign(v - g2) * g2
+            m_t = (self.beta_1 * m) + (1.0 - self.beta_1) * g
+            v_t = v - (1.0 - self.beta_2) * K.sign(v - g2) * g2
             p_t = p - lr_t * m_t / (K.sqrt(v_t) + self.epsilon)
 
             self.updates.append(K.update(m, m_t))
@@ -72,17 +75,19 @@ class Yogi(Optimizer):
             new_p = p_t
 
             # Apply constraints.
-            if getattr(p, 'constraint', None) is not None:
+            if getattr(p, "constraint", None) is not None:
                 new_p = p.constraint(new_p)
 
             self.updates.append(K.update(p, new_p))
         return self.updates
 
     def get_config(self):
-        config = {'lr': float(K.get_value(self.lr)),
-                  'beta_1': float(K.get_value(self.beta_1)),
-                  'beta_2': float(K.get_value(self.beta_2)),
-                  'decay': float(K.get_value(self.decay)),
-                  'epsilon': self.epsilon}
+        config = {
+            "lr": float(K.get_value(self.lr)),
+            "beta_1": float(K.get_value(self.beta_1)),
+            "beta_2": float(K.get_value(self.beta_2)),
+            "decay": float(K.get_value(self.decay)),
+            "epsilon": self.epsilon,
+        }
         base_config = super(Yogi, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

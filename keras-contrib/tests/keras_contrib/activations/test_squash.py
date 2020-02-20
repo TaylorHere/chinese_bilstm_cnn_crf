@@ -13,6 +13,7 @@ def get_standard_values():
 def test_squash_valid():
     """Test using a reference implementation of squash.
     """
+
     def squash(x, axis=-1):
         s_squared_norm = np.sum(np.square(x), axis) + 1e-7
         scale = np.sqrt(s_squared_norm) / (0.5 + s_squared_norm)

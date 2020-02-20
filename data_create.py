@@ -9,6 +9,7 @@ import os
 import re
 import codecs
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,13 +109,13 @@ def create_label_data(trainPath, word_dict, file_list):
 
     file_des.close()
 
-    
-def path_flatten(path, includes=['.txt']):
+
+def path_flatten(path, includes=[".txt"]):
     paths = []
     for subpath in os.listdir(path):
         for include in includes:
             relpath = os.path.join(path, subpath)
-            if os.path.isfile(relpath) and include == 'any':
+            if os.path.isfile(relpath) and include == "any":
                 paths.append(relpath)
             elif os.path.isfile(relpath) and relpath.endswith(include):
                 paths.append(relpath)

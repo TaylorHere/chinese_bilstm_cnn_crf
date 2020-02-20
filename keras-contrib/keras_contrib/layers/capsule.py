@@ -108,16 +108,18 @@ class Capsule(Layer):
           (https://arxiv.org/pdf/1710.09829.pdf)
         - [Keras-Examples-CIFAR10-CNN-Capsule]"""
 
-    def __init__(self,
-                 num_capsule,
-                 dim_capsule,
-                 routings=3,
-                 share_weights=True,
-                 initializer='glorot_uniform',
-                 activation=None,
-                 regularizer=None,
-                 constraint=None,
-                 **kwargs):
+    def __init__(
+        self,
+        num_capsule,
+        dim_capsule,
+        routings=3,
+        share_weights=True,
+        initializer="glorot_uniform",
+        activation=None,
+        regularizer=None,
+        constraint=None,
+        **kwargs
+    ):
         super(Capsule, self).__init__(**kwargs)
         self.num_capsule = num_capsule
         self.dim_capsule = dim_capsule
@@ -133,26 +135,28 @@ class Capsule(Layer):
         input_shape = to_tuple(input_shape)
         input_dim_capsule = input_shape[-1]
         if self.share_weights:
-            self.W = self.add_weight(name='capsule_kernel',
-                                     shape=(1,
-                                            input_dim_capsule,
-                                            self.num_capsule *
-                                            self.dim_capsule),
-                                     initializer=self.initializer,
-                                     regularizer=self.regularizer,
-                                     constraint=self.constraint,
-                                     trainable=True)
+            self.W = self.add_weight(
+                name="capsule_kernel",
+                shape=(1, input_dim_capsule, self.num_capsule * self.dim_capsule),
+                initializer=self.initializer,
+                regularizer=self.regularizer,
+                constraint=self.constraint,
+                trainable=True,
+            )
         else:
             input_num_capsule = input_shape[-2]
-            self.W = self.add_weight(name='capsule_kernel',
-                                     shape=(input_num_capsule,
-                                            input_dim_capsule,
-                                            self.num_capsule *
-                                            self.dim_capsule),
-                                     initializer=self.initializer,
-                                     regularizer=self.regularizer,
-                                     constraint=self.constraint,
-                                     trainable=True)
+            self.W = self.add_weight(
+                name="capsule_kernel",
+                shape=(
+                    input_num_capsule,
+                    input_dim_capsule,
+                    self.num_capsule * self.dim_capsule,
+                ),
+                initializer=self.initializer,
+                regularizer=self.regularizer,
+                constraint=self.constraint,
+                trainable=True,
+            )
 
         self.build = True
 
@@ -166,10 +170,10 @@ class Capsule(Layer):
 
         batch_size = K.shape(inputs)[0]
         input_num_capsule = K.shape(inputs)[1]
-        u_hat_vectors = K.reshape(u_hat_vectors, (batch_size,
-                                                  input_num_capsule,
-                                                  self.num_capsule,
-                                                  self.dim_capsule))
+        u_hat_vectors = K.reshape(
+            u_hat_vectors,
+            (batch_size, input_num_capsule, self.num_capsule, self.dim_capsule),
+        )
 
         u_hat_vectors = K.permute_dimensions(u_hat_vectors, (0, 2, 1, 3))
         routing_weights = K.zeros_like(u_hat_vectors[:, :, :, 0])
@@ -191,14 +195,16 @@ class Capsule(Layer):
         return (None, self.num_capsule, self.dim_capsule)
 
     def get_config(self):
-        config = {'num_capsule': self.num_capsule,
-                  'dim_capsule': self.dim_capsule,
-                  'routings': self.routings,
-                  'share_weights': self.share_weights,
-                  'activation': activations.serialize(self.activation),
-                  'regularizer': regularizers.serialize(self.regularizer),
-                  'initializer': initializers.serialize(self.initializer),
-                  'constraint': constraints.serialize(self.constraint)}
+        config = {
+            "num_capsule": self.num_capsule,
+            "dim_capsule": self.dim_capsule,
+            "routings": self.routings,
+            "share_weights": self.share_weights,
+            "activation": activations.serialize(self.activation),
+            "regularizer": regularizers.serialize(self.regularizer),
+            "initializer": initializers.serialize(self.initializer),
+            "constraint": constraints.serialize(self.constraint),
+        }
 
         base_config = super(Capsule, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

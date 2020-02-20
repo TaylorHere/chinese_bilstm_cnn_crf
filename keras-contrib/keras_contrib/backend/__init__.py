@@ -5,9 +5,9 @@ from keras import backend as K
 # core and contrib backend functions with a
 # single import statement.
 
-if K.backend() == 'theano':
+if K.backend() == "theano":
     from .theano_backend import *
-elif K.backend() == 'tensorflow':
+elif K.backend() == "tensorflow":
     from .tensorflow_backend import *
-elif K.backend() == 'cntk':
+elif K.backend() == "cntk":
     from .cntk_backend import *

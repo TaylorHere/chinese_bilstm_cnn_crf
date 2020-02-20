@@ -16,6 +16,7 @@ import argparse
 from paths import TrainPath
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train_dir", help="train directory", default="/home/jovyan/shared/", type=str
     )
-    parser.add_argument("--to_file", default="/home/jovyan/shared/bilstm_cnn_crf_model.png", help="output file paht")
+    parser.add_argument(
+        "--to_file",
+        default="/home/jovyan/shared/bilstm_cnn_crf_model.png",
+        help="output file paht",
+    )
 
     args = parser.parse_args()
     trainPath = TrainPath(args.train_dir)
@@ -43,11 +48,6 @@ if __name__ == "__main__":
 
     model.load_weights(trainPath.weights_path)
 
-    plot_model(
-        model,
-        to_file=args.to_file,
-        show_shapes=True,
-        show_layer_names=True,
-    )
+    plot_model(model, to_file=args.to_file, show_shapes=True, show_layer_names=True)
 
     log.info(u"模型绘制完成" + "--------------OK")

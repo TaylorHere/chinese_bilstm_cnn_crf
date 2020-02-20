@@ -17,15 +17,22 @@ from keras.backend.theano_backend import _postprocess_conv2d_output
 py_all = all
 
 
-def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_first',
-           image_shape=None, filter_shape=None):
-    '''
+def conv2d(
+    x,
+    kernel,
+    strides=(1, 1),
+    padding="valid",
+    data_format="channels_first",
+    image_shape=None,
+    filter_shape=None,
+):
+    """
     padding: string, "same" or "valid".
-    '''
-    if data_format not in {'channels_first', 'channels_last'}:
-        raise Exception('Unknown data_format ' + str(data_format))
+    """
+    if data_format not in {"channels_first", "channels_last"}:
+        raise Exception("Unknown data_format " + str(data_format))
 
-    if data_format == 'channels_last':
+    if data_format == "channels_last":
         # TF uses the last dimension as channel dimension,
         # instead of the 2nd one.
         # TH input shape: (samples, input_depth, rows, cols)
@@ -35,19 +42,27 @@ def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_fir
         x = x.dimshuffle((0, 3, 1, 2))
         kernel = kernel.dimshuffle((3, 2, 0, 1))
         if image_shape:
-            image_shape = (image_shape[0], image_shape[3],
-                           image_shape[1], image_shape[2])
+            image_shape = (
+                image_shape[0],
+                image_shape[3],
+                image_shape[1],
+                image_shape[2],
+            )
         if filter_shape:
-            filter_shape = (filter_shape[3], filter_shape[2],
-                            filter_shape[0], filter_shape[1])
+            filter_shape = (
+                filter_shape[3],
+                filter_shape[2],
+                filter_shape[0],
+                filter_shape[1],
+            )
 
-    if padding == 'same':
-        th_padding = 'half'
+    if padding == "same":
+        th_padding = "half"
         np_kernel = kernel.eval()
-    elif padding == 'valid':
-        th_padding = 'valid'
+    elif padding == "valid":
+        th_padding = "valid"
     else:
-        raise Exception('Border mode not supported: ' + str(padding))
+        raise Exception("Border mode not supported: " + str(padding))
 
     # Theano might not accept long type
     def int_or_none(value):
@@ -62,13 +77,16 @@ def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_fir
     if filter_shape is not None:
         filter_shape = tuple(int_or_none(v) for v in filter_shape)
 
-    conv_out = T.nnet.conv2d(x, kernel,
-                             border_mode=th_padding,
-                             subsample=strides,
-                             input_shape=image_shape,
-                             filter_shape=filter_shape)
+    conv_out = T.nnet.conv2d(
+        x,
+        kernel,
+        border_mode=th_padding,
+        subsample=strides,
+        input_shape=image_shape,
+        filter_shape=filter_shape,
+    )
 
-    if padding == 'same':
+    if padding == "same":
         if np_kernel.shape[2] % 2 == 0:
             end = (x.shape[2] + strides[0] - 1) // strides[0]
             conv_out = conv_out[:, :, :end, :]
@@ -76,15 +94,15 @@ def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_fir
             end = (x.shape[3] + strides[1] - 1) // strides[1]
             conv_out = conv_out[:, :, :, :end]
 
-    if data_format == 'channels_last':
+    if data_format == "channels_last":
         conv_out = conv_out.dimshuffle((0, 2, 3, 1))
     return conv_out
 
 
-def extract_image_patches(X, ksizes, strides,
-                          padding='valid',
-                          data_format='channels_first'):
-    '''
+def extract_image_patches(
+    X, ksizes, strides, padding="valid", data_format="channels_first"
+):
+    """
     Extract the patches from an image
     Parameters
     ----------
@@ -98,11 +116,11 @@ def extract_image_patches(X, ksizes, strides,
     The (k_w,k_h) patches extracted
     TF ==> (batch_size,w,h,k_w,k_h,c)
     TH ==> (batch_size,w,h,c,k_w,k_h)
-    '''
+    """
     patch_size = ksizes[1]
-    if padding == 'same':
-        padding = 'ignore_borders'
-    if data_format == 'channels_last':
+    if padding == "same":
+        padding = "ignore_borders"
+    if data_format == "channels_last":
         X = KTH.permute_dimensions(X, [0, 3, 1, 2])
     # Thanks to https://github.com/awentzonline for the help!
     batch, c, w, h = KTH.shape(X)
@@ -118,7 +136,7 @@ def extract_image_patches(X, ksizes, strides,
     # arrange in a 2d-grid (rows, cols, channels, px, py)
     new_shape = (batch, num_rows, num_cols, num_channels, patch_size, patch_size)
     patches = KTH.reshape(patches, new_shape)
-    if data_format == 'channels_last':
+    if data_format == "channels_last":
         patches = KTH.permute_dimensions(patches, [0, 1, 2, 4, 5, 3])
     return patches
 
@@ -143,7 +161,7 @@ def depth_to_space(input, scale, data_format=None):
 
 
 def moments(x, axes, shift=None, keep_dims=False):
-    ''' Calculates and returns the mean and variance of the input '''
+    """ Calculates and returns the mean and variance of the input """
 
     mean_batch = KTH.mean(x, axis=axes, keepdims=keep_dims)
     var_batch = KTH.var(x, axis=axes, keepdims=keep_dims)

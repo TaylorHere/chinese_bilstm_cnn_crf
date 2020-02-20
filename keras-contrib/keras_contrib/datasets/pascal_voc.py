@@ -54,10 +54,30 @@ def pascal_segmentation_lut():
         look-up table with number and correspondng class names
     """
 
-    class_names = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
-                   'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
-                   'dog', 'horse', 'motorbike', 'person', 'potted-plant',
-                   'sheep', 'sofa', 'train', 'tv/monitor', 'ambigious']
+    class_names = [
+        "background",
+        "aeroplane",
+        "bicycle",
+        "bird",
+        "boat",
+        "bottle",
+        "bus",
+        "car",
+        "cat",
+        "chair",
+        "cow",
+        "diningtable",
+        "dog",
+        "horse",
+        "motorbike",
+        "person",
+        "potted-plant",
+        "sheep",
+        "sofa",
+        "train",
+        "tv/monitor",
+        "ambigious",
+    ]
 
     enumerated_array = enumerate(class_names[:-1])
 
@@ -88,20 +108,20 @@ def get_pascal_segmentation_images_lists_txts(pascal_root):
         Array that contains paths for train/val/trainval txts with images names.
     """
 
-    segmentation_relative_folder = 'ImageSets/Segmentation'
+    segmentation_relative_folder = "ImageSets/Segmentation"
 
     segmentation_folder = os.path.join(pascal_root, segmentation_relative_folder)
 
-    pascal_train_list_filename = os.path.join(segmentation_folder, 'train.txt')
+    pascal_train_list_filename = os.path.join(segmentation_folder, "train.txt")
 
-    pascal_validation_list_filename = os.path.join(segmentation_folder, 'val.txt')
+    pascal_validation_list_filename = os.path.join(segmentation_folder, "val.txt")
 
-    pascal_trainval_list_filename = os.path.join(segmentation_folder, 'trainval.txt')
+    pascal_trainval_list_filename = os.path.join(segmentation_folder, "trainval.txt")
 
     return [
         pascal_train_list_filename,
         pascal_validation_list_filename,
-        pascal_trainval_list_filename
+        pascal_trainval_list_filename,
     ]
 
 
@@ -124,7 +144,7 @@ def readlines_with_strip(filename):
     """
 
     # Get raw filnames from the file
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         lines = f.readlines()
 
     # Clean filenames from whitespaces and newline symbols
@@ -167,12 +187,12 @@ def add_full_path_and_extention_to_filenames(filenames_array, full_path, extenti
     full_filenames : array of strings
         updated array with filenames
     """
-    return map(lambda x: os.path.join(full_path, x) + '.' + extention, filenames_array)
+    return map(lambda x: os.path.join(full_path, x) + "." + extention, filenames_array)
 
 
-def add_full_path_and_extention_to_filenames_array_version(filenames_array_array,
-                                                           full_path,
-                                                           extention):
+def add_full_path_and_extention_to_filenames_array_version(
+    filenames_array_array, full_path, extention
+):
     """Array version of the add_full_path_and_extention_to_filenames() function.
     Applies add_full_path_and_extention_to_filenames() to each element of array.
     Parameters
@@ -188,10 +208,10 @@ def add_full_path_and_extention_to_filenames_array_version(filenames_array_array
     full_filenames : array of array of strings
         updated array of array with filenames
     """
-    return map(lambda x: add_full_path_and_extention_to_filenames(x,
-                                                                  full_path,
-                                                                  extention),
-               filenames_array_array)
+    return map(
+        lambda x: add_full_path_and_extention_to_filenames(x, full_path, extention),
+        filenames_array_array,
+    )
 
 
 def get_pascal_segmentation_image_annotation_filenames_pairs(pascal_root):
@@ -212,33 +232,27 @@ def get_pascal_segmentation_image_annotation_filenames_pairs(pascal_root):
         Array with filename pairs.
     """
 
-    pascal_relative_images_folder = 'JPEGImages'
-    pascal_relative_class_annotations_folder = 'SegmentationClass'
+    pascal_relative_images_folder = "JPEGImages"
+    pascal_relative_class_annotations_folder = "SegmentationClass"
 
-    images_extention = 'jpg'
-    annotations_extention = 'png'
+    images_extention = "jpg"
+    annotations_extention = "png"
 
-    pascal_images_folder = os.path.join(
-        pascal_root, pascal_relative_images_folder)
+    pascal_images_folder = os.path.join(pascal_root, pascal_relative_images_folder)
     pascal_class_annotations_folder = os.path.join(
-        pascal_root, pascal_relative_class_annotations_folder)
+        pascal_root, pascal_relative_class_annotations_folder
+    )
 
-    pascal_images_lists_txts = get_pascal_segmentation_images_lists_txts(
-        pascal_root)
+    pascal_images_lists_txts = get_pascal_segmentation_images_lists_txts(pascal_root)
 
-    pascal_image_names = readlines_with_strip_array_version(
-        pascal_images_lists_txts)
+    pascal_image_names = readlines_with_strip_array_version(pascal_images_lists_txts)
 
     images_full_names = add_full_path_and_extention_to_filenames_array_version(
-        pascal_image_names,
-        pascal_images_folder,
-        images_extention,
+        pascal_image_names, pascal_images_folder, images_extention
     )
 
     annotations_full_names = add_full_path_and_extention_to_filenames_array_version(
-        pascal_image_names,
-        pascal_class_annotations_folder,
-        annotations_extention,
+        pascal_image_names, pascal_class_annotations_folder, annotations_extention
     )
 
     # Combine so that we have [(images full filenames, annotation full names), .. ]
@@ -257,7 +271,8 @@ def get_pascal_segmentation_image_annotation_filenames_pairs(pascal_root):
 
 @data_pascal_voc.command
 def convert_pascal_berkeley_augmented_mat_annotations_to_png(
-        pascal_berkeley_augmented_root):
+    pascal_berkeley_augmented_root
+):
     """ Creates a new folder in the root folder of the dataset with annotations stored
     in .png. The function accepts a full path to the root of Berkeley augmented Pascal
     VOC segmentation dataset and converts annotations that are stored in .mat files to
@@ -275,7 +290,7 @@ def convert_pascal_berkeley_augmented_mat_annotations_to_png(
 
     import scipy.io
 
-    def read_class_annotation_array_from_berkeley_mat(mat_filename, key='GTcls'):
+    def read_class_annotation_array_from_berkeley_mat(mat_filename, key="GTcls"):
 
         # Mat to png conversion for
         # http://www.cs.berkeley.edu/~bharath2/codes/SBD/download.html
@@ -284,22 +299,25 @@ def convert_pascal_berkeley_augmented_mat_annotations_to_png(
         # Credit:
         # https://github.com/martinkersner/train-DeepLab/blob/master/utils.py
 
-        mat = scipy.io.loadmat(mat_filename, mat_dtype=True,
-                               squeeze_me=True, struct_as_record=False)
+        mat = scipy.io.loadmat(
+            mat_filename, mat_dtype=True, squeeze_me=True, struct_as_record=False
+        )
         return mat[key].Segmentation
 
-    mat_file_extension_string = '.mat'
-    png_file_extension_string = '.png'
-    relative_path_to_annotation_mat_files = 'dataset/cls'
-    relative_path_to_annotation_png_files = 'dataset/cls_png'
+    mat_file_extension_string = ".mat"
+    png_file_extension_string = ".png"
+    relative_path_to_annotation_mat_files = "dataset/cls"
+    relative_path_to_annotation_png_files = "dataset/cls_png"
 
     mat_file_extension_string_length = len(mat_file_extension_string)
 
-    annotation_mat_files_fullpath = os.path.join(pascal_berkeley_augmented_root,
-                                                 relative_path_to_annotation_mat_files)
+    annotation_mat_files_fullpath = os.path.join(
+        pascal_berkeley_augmented_root, relative_path_to_annotation_mat_files
+    )
 
-    annotation_png_save_fullpath = os.path.join(pascal_berkeley_augmented_root,
-                                                relative_path_to_annotation_png_files)
+    annotation_png_save_fullpath = os.path.join(
+        pascal_berkeley_augmented_root, relative_path_to_annotation_png_files
+    )
 
     # Create the folder where all the converted png files will be placed
     # If the folder already exists, do nothing
@@ -313,20 +331,22 @@ def convert_pascal_berkeley_augmented_mat_annotations_to_png(
     for current_mat_file_name in mat_files_names:
 
         current_file_name_without_extention = current_mat_file_name[
-            :-mat_file_extension_string_length]
+            :-mat_file_extension_string_length
+        ]
 
-        current_mat_file_full_path = os.path.join(annotation_mat_files_fullpath,
-                                                  current_mat_file_name)
+        current_mat_file_full_path = os.path.join(
+            annotation_mat_files_fullpath, current_mat_file_name
+        )
 
         current_png_file_full_path_to_be_saved = os.path.join(
-            annotation_png_save_fullpath,
-            current_file_name_without_extention,
+            annotation_png_save_fullpath, current_file_name_without_extention
         )
 
         current_png_file_full_path_to_be_saved += png_file_extension_string
 
         annotation_array = read_class_annotation_array_from_berkeley_mat(
-            current_mat_file_full_path)
+            current_mat_file_full_path
+        )
 
         # TODO: hide 'low-contrast' image warning during saving.
         io.imsave(current_png_file_full_path_to_be_saved, annotation_array)
@@ -348,27 +368,24 @@ def get_pascal_berkeley_augmented_segmentation_images_lists_txts(pascal_berkeley
         Array that contains paths for train/val txts with images names.
     """
 
-    segmentation_relative_folder = 'dataset'
+    segmentation_relative_folder = "dataset"
 
-    segmentation_folder = os.path.join(pascal_berkeley_root,
-                                       segmentation_relative_folder)
+    segmentation_folder = os.path.join(
+        pascal_berkeley_root, segmentation_relative_folder
+    )
 
     # TODO: add function that will joing both train.txt and val.txt into
     # trainval.txt
-    pascal_train_list_filename = os.path.join(segmentation_folder,
-                                              'train.txt')
+    pascal_train_list_filename = os.path.join(segmentation_folder, "train.txt")
 
-    pascal_validation_list_filename = os.path.join(segmentation_folder,
-                                                   'val.txt')
+    pascal_validation_list_filename = os.path.join(segmentation_folder, "val.txt")
 
-    return [
-        pascal_train_list_filename,
-        pascal_validation_list_filename
-    ]
+    return [pascal_train_list_filename, pascal_validation_list_filename]
 
 
 def get_pascal_berkeley_augmented_segmentation_image_annotation_filenames_pairs(
-        pascal_berkeley_root):
+    pascal_berkeley_root
+):
     """Return (image, annotation) filenames pairs from PASCAL Berkeley VOC segmentation
     dataset. Returns three dimensional array where first dimension represents the type
     of the dataset: train, val in the respective order. Second
@@ -386,34 +403,31 @@ def get_pascal_berkeley_augmented_segmentation_image_annotation_filenames_pairs(
         Array with filename pairs.
     """
 
-    pascal_relative_images_folder = 'dataset/img'
-    pascal_relative_class_annotations_folder = 'dataset/cls_png'
+    pascal_relative_images_folder = "dataset/img"
+    pascal_relative_class_annotations_folder = "dataset/cls_png"
 
-    images_extention = 'jpg'
-    annotations_extention = 'png'
+    images_extention = "jpg"
+    annotations_extention = "png"
 
     pascal_images_folder = os.path.join(
-        pascal_berkeley_root, pascal_relative_images_folder)
+        pascal_berkeley_root, pascal_relative_images_folder
+    )
     pascal_class_annotations_folder = os.path.join(
-        pascal_berkeley_root, pascal_relative_class_annotations_folder)
+        pascal_berkeley_root, pascal_relative_class_annotations_folder
+    )
 
-    pascal_images_lists_txts = (
-        get_pascal_berkeley_augmented_segmentation_images_lists_txts(
-            pascal_berkeley_root))
+    pascal_images_lists_txts = get_pascal_berkeley_augmented_segmentation_images_lists_txts(
+        pascal_berkeley_root
+    )
 
-    pascal_image_names = readlines_with_strip_array_version(
-        pascal_images_lists_txts)
+    pascal_image_names = readlines_with_strip_array_version(pascal_images_lists_txts)
 
     images_full_names = add_full_path_and_extention_to_filenames_array_version(
-        pascal_image_names,
-        pascal_images_folder,
-        images_extention,
+        pascal_image_names, pascal_images_folder, images_extention
     )
 
     annotations_full_names = add_full_path_and_extention_to_filenames_array_version(
-        pascal_image_names,
-        pascal_class_annotations_folder,
-        annotations_extention,
+        pascal_image_names, pascal_class_annotations_folder, annotations_extention
     )
 
     # Combine so that we have [(images full filenames, annotation full names), .. ]
@@ -431,8 +445,7 @@ def get_pascal_berkeley_augmented_segmentation_image_annotation_filenames_pairs(
 
 
 def get_pascal_berkeley_augmented_selected_image_annotation_filenames_pairs(
-        pascal_berkeley_root,
-        selected_names,
+    pascal_berkeley_root, selected_names
 ):
     """Returns (image, annotation) filenames pairs from PASCAL Berkeley VOC segmentation
     dataset for selected names. The function accepts the selected file names from PASCAL
@@ -452,31 +465,28 @@ def get_pascal_berkeley_augmented_selected_image_annotation_filenames_pairs(
     image_annotation_pairs :
         Array with filename pairs with fullnames.
     """
-    pascal_relative_images_folder = 'dataset/img'
-    pascal_relative_class_annotations_folder = 'dataset/cls_png'
+    pascal_relative_images_folder = "dataset/img"
+    pascal_relative_class_annotations_folder = "dataset/cls_png"
 
-    images_extention = 'jpg'
-    annotations_extention = 'png'
+    images_extention = "jpg"
+    annotations_extention = "png"
 
     pascal_images_folder = os.path.join(
-        pascal_berkeley_root, pascal_relative_images_folder)
+        pascal_berkeley_root, pascal_relative_images_folder
+    )
     pascal_class_annotations_folder = os.path.join(
-        pascal_berkeley_root, pascal_relative_class_annotations_folder)
+        pascal_berkeley_root, pascal_relative_class_annotations_folder
+    )
 
     images_full_names = add_full_path_and_extention_to_filenames(
-        selected_names,
-        pascal_images_folder,
-        images_extention,
+        selected_names, pascal_images_folder, images_extention
     )
 
     annotations_full_names = add_full_path_and_extention_to_filenames(
-        selected_names,
-        pascal_class_annotations_folder,
-        annotations_extention,
+        selected_names, pascal_class_annotations_folder, annotations_extention
     )
 
-    image_annotation_pairs = zip(images_full_names,
-                                 annotations_full_names)
+    image_annotation_pairs = zip(images_full_names, annotations_full_names)
 
     return image_annotation_pairs
 
@@ -500,36 +510,33 @@ def get_pascal_selected_image_annotation_filenames_pairs(pascal_root, selected_n
     image_annotation_pairs :
         Array with filename pairs with fullnames.
     """
-    pascal_relative_images_folder = 'JPEGImages'
-    pascal_relative_class_annotations_folder = 'SegmentationClass'
+    pascal_relative_images_folder = "JPEGImages"
+    pascal_relative_class_annotations_folder = "SegmentationClass"
 
-    images_extention = 'jpg'
-    annotations_extention = 'png'
+    images_extention = "jpg"
+    annotations_extention = "png"
 
-    pascal_images_folder = os.path.join(
-        pascal_root, pascal_relative_images_folder)
+    pascal_images_folder = os.path.join(pascal_root, pascal_relative_images_folder)
     pascal_class_annotations_folder = os.path.join(
-        pascal_root, pascal_relative_class_annotations_folder)
-
-    images_full_names = add_full_path_and_extention_to_filenames(selected_names,
-                                                                 pascal_images_folder,
-                                                                 images_extention)
-
-    annotations_full_names = add_full_path_and_extention_to_filenames(
-        selected_names,
-        pascal_class_annotations_folder,
-        annotations_extention,
+        pascal_root, pascal_relative_class_annotations_folder
     )
 
-    image_annotation_pairs = zip(images_full_names,
-                                 annotations_full_names)
+    images_full_names = add_full_path_and_extention_to_filenames(
+        selected_names, pascal_images_folder, images_extention
+    )
+
+    annotations_full_names = add_full_path_and_extention_to_filenames(
+        selected_names, pascal_class_annotations_folder, annotations_extention
+    )
+
+    image_annotation_pairs = zip(images_full_names, annotations_full_names)
 
     return image_annotation_pairs
 
 
-def get_augmented_pascal_image_annotation_filename_pairs(pascal_root,
-                                                         pascal_berkeley_root,
-                                                         mode=2):
+def get_augmented_pascal_image_annotation_filename_pairs(
+    pascal_root, pascal_berkeley_root, mode=2
+):
     """Returns image/annotation filenames pairs train/val splits from combined Pascal
     VOC. Returns two arrays with train and validation split respectively that has
     image full filename/ annotation full filename pairs in each of the that were derived
@@ -581,18 +588,20 @@ def get_augmented_pascal_image_annotation_filename_pairs(pascal_root,
     image_annotation_pairs : Array with filename pairs with fullnames.
         [[(str, str), .. , (str, str)][(str, str), .., (str, str)]]
     """  # pylint: disable=E501
-    pascal_txts = get_pascal_segmentation_images_lists_txts(
-        pascal_root=pascal_root)
+    pascal_txts = get_pascal_segmentation_images_lists_txts(pascal_root=pascal_root)
     berkeley_txts = get_pascal_berkeley_augmented_segmentation_images_lists_txts(
-        pascal_berkeley_root=pascal_berkeley_root)
+        pascal_berkeley_root=pascal_berkeley_root
+    )
 
     pascal_name_lists = readlines_with_strip_array_version(pascal_txts)
     berkeley_name_lists = readlines_with_strip_array_version(berkeley_txts)
 
     pascal_train_name_set, pascal_val_name_set, _ = map(
-        lambda x: set(x), pascal_name_lists)
+        lambda x: set(x), pascal_name_lists
+    )
     berkeley_train_name_set, berkeley_val_name_set = map(
-        lambda x: set(x), berkeley_name_lists)
+        lambda x: set(x), berkeley_name_lists
+    )
 
     all_berkeley = berkeley_train_name_set | berkeley_val_name_set
     all_pascal = pascal_train_name_set | pascal_val_name_set
@@ -621,32 +630,37 @@ def get_augmented_pascal_image_annotation_filename_pairs(pascal_root,
     # The rest of the data will be loaded from pascal
     train_from_pascal = train - train_from_berkeley
 
-    train_from_berkeley_image_annotation_pairs = (
-        get_pascal_berkeley_augmented_selected_image_annotation_filenames_pairs(
-            pascal_berkeley_root,
-            list(train_from_berkeley)))
+    train_from_berkeley_image_annotation_pairs = get_pascal_berkeley_augmented_selected_image_annotation_filenames_pairs(
+        pascal_berkeley_root, list(train_from_berkeley)
+    )
 
-    train_from_pascal_image_annotation_pairs = \
-        get_pascal_selected_image_annotation_filenames_pairs(pascal_root,
-                                                             list(train_from_pascal))
+    train_from_pascal_image_annotation_pairs = get_pascal_selected_image_annotation_filenames_pairs(
+        pascal_root, list(train_from_pascal)
+    )
 
-    overall_train_image_annotation_filename_pairs = \
-        list(train_from_berkeley_image_annotation_pairs) + \
-        list(train_from_pascal_image_annotation_pairs)
+    overall_train_image_annotation_filename_pairs = list(
+        train_from_berkeley_image_annotation_pairs
+    ) + list(train_from_pascal_image_annotation_pairs)
 
-    overall_val_image_annotation_filename_pairs = \
-        get_pascal_selected_image_annotation_filenames_pairs(pascal_root,
-                                                             validation)
+    overall_val_image_annotation_filename_pairs = get_pascal_selected_image_annotation_filenames_pairs(
+        pascal_root, validation
+    )
 
-    return (overall_train_image_annotation_filename_pairs,
-            overall_val_image_annotation_filename_pairs)
+    return (
+        overall_train_image_annotation_filename_pairs,
+        overall_val_image_annotation_filename_pairs,
+    )
 
 
-def pascal_filename_pairs_to_imageset_txt(voc_imageset_txt_path, filename_pairs,
-                                          image_extension='.jpg'):
-    with open(voc_imageset_txt_path, 'w') as txtfile:
-        [txtfile.write(os.path.splitext(os.path.basename(file1))[0] + '\n')
-         for file1, file2 in filename_pairs if file1.endswith(image_extension)]
+def pascal_filename_pairs_to_imageset_txt(
+    voc_imageset_txt_path, filename_pairs, image_extension=".jpg"
+):
+    with open(voc_imageset_txt_path, "w") as txtfile:
+        [
+            txtfile.write(os.path.splitext(os.path.basename(file1))[0] + "\n")
+            for file1, file2 in filename_pairs
+            if file1.endswith(image_extension)
+        ]
 
 
 def pascal_combine_annotation_files(filename_pairs, output_annotations_path):
@@ -659,8 +673,8 @@ def pascal_combine_annotation_files(filename_pairs, output_annotations_path):
 def voc_config():
     # TODO(ahundt) add md5 sums for each file
     verbose = True
-    dataset_root = os.path.join(os.path.expanduser("~"), '.keras', 'datasets')
-    dataset_path = dataset_root + '/VOC2012'
+    dataset_root = os.path.join(os.path.expanduser("~"), ".keras", "datasets")
+    dataset_path = dataset_root + "/VOC2012"
     # sys.path.append("tf-image-segmentation/")
     # os.environ["CUDA_VISIBLE_DEVICES"] = '1'
     # based on https://github.com/martinkersner/train-DeepLab
@@ -669,7 +683,7 @@ def voc_config():
     # wget
     # http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
     # # 2 GB
-    pascal_root = dataset_path + '/VOCdevkit/VOC2012'
+    pascal_root = dataset_path + "/VOCdevkit/VOC2012"
 
     # berkeley augmented Pascal VOC
     # wget
@@ -679,37 +693,40 @@ def voc_config():
     # Pascal Context
     # http://www.cs.stanford.edu/~roozbeh/pascal-context/
     # http://www.cs.stanford.edu/~roozbeh/pascal-context/trainval.tar.gz
-    pascal_berkeley_root = dataset_path + '/benchmark_RELEASE'
+    pascal_berkeley_root = dataset_path + "/benchmark_RELEASE"
     urls = [
-        'http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar',
-        'http://www.eecs.berkeley.edu/Research/Projects/'
-        'CS/vision/grouping/semantic_contours/benchmark.tgz',
-        'http://www.cs.stanford.edu/~roozbeh/pascal-context/trainval.tar.gz',
-        'http://www.cs.stanford.edu/~roozbeh/pascal-context/33_context_labels.tar.gz',
-        'http://www.cs.stanford.edu/~roozbeh/pascal-context/59_context_labels.tar.gz',
-        'http://www.cs.stanford.edu/~roozbeh/pascal-context/33_labels.txt',
-        'http://www.cs.stanford.edu/~roozbeh/pascal-context/59_labels.txt'
+        "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar",
+        "http://www.eecs.berkeley.edu/Research/Projects/"
+        "CS/vision/grouping/semantic_contours/benchmark.tgz",
+        "http://www.cs.stanford.edu/~roozbeh/pascal-context/trainval.tar.gz",
+        "http://www.cs.stanford.edu/~roozbeh/pascal-context/33_context_labels.tar.gz",
+        "http://www.cs.stanford.edu/~roozbeh/pascal-context/59_context_labels.tar.gz",
+        "http://www.cs.stanford.edu/~roozbeh/pascal-context/33_labels.txt",
+        "http://www.cs.stanford.edu/~roozbeh/pascal-context/59_labels.txt",
     ]
-    filenames = ['VOCtrainval_11-May-2012.tar',
-                 'benchmark.tgz',
-                 'trainval.tar.gz',
-                 '33_context_labels.tar.gz',
-                 '59_context_labels.tar.gz',
-                 '33_labels.txt',
-                 '59_labels.txt'
-                 ]
+    filenames = [
+        "VOCtrainval_11-May-2012.tar",
+        "benchmark.tgz",
+        "trainval.tar.gz",
+        "33_context_labels.tar.gz",
+        "59_context_labels.tar.gz",
+        "33_labels.txt",
+        "59_labels.txt",
+    ]
 
-    md5s = ['6cd6e144f989b92b3379bac3b3de84fd',
-            '82b4d87ceb2ed10f6038a1cba92111cb',
-            'df034edb2c12aa7d33b42b20bb1796e3',
-            '180101cfc01c71867b6686207f071eb9',
-            'f85d450010762a0e1080304286ce30ed',
-            '8840f5439b471aecf991ac6448b826e6',
-            '993901f2d930cc038c406845f08fa082']
+    md5s = [
+        "6cd6e144f989b92b3379bac3b3de84fd",
+        "82b4d87ceb2ed10f6038a1cba92111cb",
+        "df034edb2c12aa7d33b42b20bb1796e3",
+        "180101cfc01c71867b6686207f071eb9",
+        "f85d450010762a0e1080304286ce30ed",
+        "8840f5439b471aecf991ac6448b826e6",
+        "993901f2d930cc038c406845f08fa082",
+    ]
 
-    combined_imageset_train_txt = dataset_path + '/combined_imageset_train.txt'
-    combined_imageset_val_txt = dataset_path + '/combined_imageset_val.txt'
-    combined_annotations_path = dataset_path + '/combined_annotations'
+    combined_imageset_train_txt = dataset_path + "/combined_imageset_train.txt"
+    combined_imageset_val_txt = dataset_path + "/combined_imageset_val.txt"
+    combined_annotations_path = dataset_path + "/combined_annotations"
 
     # see get_augmented_pascal_image_annotation_filename_pairs()
     voc_data_subset_mode = 2
@@ -727,82 +744,100 @@ def pascal_voc_files(dataset_path, filenames, dataset_root, urls, md5s):
 
 @data_pascal_voc.command
 def pascal_voc_download(dataset_path, filenames, dataset_root, urls, md5s):
-    zip_paths = pascal_voc_files(
-        dataset_path, filenames, dataset_root, urls, md5s)
+    zip_paths = pascal_voc_files(dataset_path, filenames, dataset_root, urls, md5s)
     for url, filename, md5 in zip(urls, filenames, md5s):
-        path = get_file(filename, url, md5_hash=md5,
-                        extract=True, cache_subdir=dataset_path)
+        path = get_file(
+            filename, url, md5_hash=md5, extract=True, cache_subdir=dataset_path
+        )
 
 
 @data_pascal_voc.command
-def pascal_voc_berkeley_combined(dataset_path,
-                                 pascal_root,
-                                 pascal_berkeley_root,
-                                 voc_data_subset_mode,
-                                 combined_imageset_train_txt,
-                                 combined_imageset_val_txt,
-                                 combined_annotations_path):
+def pascal_voc_berkeley_combined(
+    dataset_path,
+    pascal_root,
+    pascal_berkeley_root,
+    voc_data_subset_mode,
+    combined_imageset_train_txt,
+    combined_imageset_val_txt,
+    combined_annotations_path,
+):
     # Returns a list of (image, annotation)
     # filename pairs (filename.jpg, filename.png)
-    overall_train_image_annotation_filename_pairs, \
-        overall_val_image_annotation_filename_pairs = \
-        get_augmented_pascal_image_annotation_filename_pairs(
-            pascal_root=pascal_root,
-            pascal_berkeley_root=pascal_berkeley_root,
-            mode=voc_data_subset_mode)
+    overall_train_image_annotation_filename_pairs, overall_val_image_annotation_filename_pairs = get_augmented_pascal_image_annotation_filename_pairs(
+        pascal_root=pascal_root,
+        pascal_berkeley_root=pascal_berkeley_root,
+        mode=voc_data_subset_mode,
+    )
     # combine the annotation files into one folder
     pascal_combine_annotation_files(
-        list(overall_train_image_annotation_filename_pairs) +
-        list(overall_val_image_annotation_filename_pairs),
-        combined_annotations_path)
+        list(overall_train_image_annotation_filename_pairs)
+        + list(overall_val_image_annotation_filename_pairs),
+        combined_annotations_path,
+    )
     # generate the train imageset txt
     pascal_filename_pairs_to_imageset_txt(
-        combined_imageset_train_txt,
-        overall_train_image_annotation_filename_pairs
+        combined_imageset_train_txt, overall_train_image_annotation_filename_pairs
     )
     # generate the val imageset txt
     pascal_filename_pairs_to_imageset_txt(
-        combined_imageset_val_txt,
-        overall_val_image_annotation_filename_pairs
+        combined_imageset_val_txt, overall_val_image_annotation_filename_pairs
     )
 
 
 @data_pascal_voc.command
-def pascal_voc_setup(filenames, dataset_path, pascal_root,
-                     pascal_berkeley_root, dataset_root,
-                     voc_data_subset_mode,
-                     urls, md5s,
-                     combined_imageset_train_txt,
-                     combined_imageset_val_txt,
-                     combined_annotations_path):
+def pascal_voc_setup(
+    filenames,
+    dataset_path,
+    pascal_root,
+    pascal_berkeley_root,
+    dataset_root,
+    voc_data_subset_mode,
+    urls,
+    md5s,
+    combined_imageset_train_txt,
+    combined_imageset_val_txt,
+    combined_annotations_path,
+):
     # download the dataset
-    pascal_voc_download(dataset_path, filenames,
-                        dataset_root, urls, md5s)
+    pascal_voc_download(dataset_path, filenames, dataset_root, urls, md5s)
     # convert the relevant files to a more useful format
-    convert_pascal_berkeley_augmented_mat_annotations_to_png(
-        pascal_berkeley_root)
-    pascal_voc_berkeley_combined(dataset_path,
-                                 pascal_root,
-                                 pascal_berkeley_root,
-                                 voc_data_subset_mode,
-                                 combined_imageset_train_txt,
-                                 combined_imageset_val_txt,
-                                 combined_annotations_path)
+    convert_pascal_berkeley_augmented_mat_annotations_to_png(pascal_berkeley_root)
+    pascal_voc_berkeley_combined(
+        dataset_path,
+        pascal_root,
+        pascal_berkeley_root,
+        voc_data_subset_mode,
+        combined_imageset_train_txt,
+        combined_imageset_val_txt,
+        combined_annotations_path,
+    )
 
 
 @data_pascal_voc.automain
-def main(filenames, dataset_path, pascal_root,
-         pascal_berkeley_root, dataset_root,
-         voc_data_subset_mode,
-         urls, md5s,
-         combined_imageset_train_txt,
-         combined_imageset_val_txt,
-         combined_annotations_path):
+def main(
+    filenames,
+    dataset_path,
+    pascal_root,
+    pascal_berkeley_root,
+    dataset_root,
+    voc_data_subset_mode,
+    urls,
+    md5s,
+    combined_imageset_train_txt,
+    combined_imageset_val_txt,
+    combined_annotations_path,
+):
     voc_config()
-    pascal_voc_setup(filenames, dataset_path, pascal_root,
-                     pascal_berkeley_root, dataset_root,
-                     voc_data_subset_mode,
-                     urls, md5s,
-                     combined_imageset_train_txt,
-                     combined_imageset_val_txt,
-                     combined_annotations_path)
+    pascal_voc_setup(
+        filenames,
+        dataset_path,
+        pascal_root,
+        pascal_berkeley_root,
+        dataset_root,
+        voc_data_subset_mode,
+        urls,
+        md5s,
+        combined_imageset_train_txt,
+        combined_imageset_val_txt,
+        combined_annotations_path,
+    )

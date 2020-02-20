@@ -10,9 +10,14 @@ from keras.models import Model
 from keras import backend as K
 
 
-def get_test_data(num_train=1000, num_test=500, input_shape=(10,),
-                  output_shape=(2,),
-                  classification=True, num_classes=2):
+def get_test_data(
+    num_train=1000,
+    num_test=500,
+    input_shape=(10,),
+    output_shape=(2,),
+    classification=True,
+    num_classes=2,
+):
     """Generates test data to train a model on.
 
     classification=True overrides output_shape
@@ -38,9 +43,16 @@ def get_test_data(num_train=1000, num_test=500, input_shape=(10,),
     return (X[:num_train], y[:num_train]), (X[num_train:], y[num_train:])
 
 
-def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
-               input_data=None, expected_output=None,
-               expected_output_dtype=None, fixed_batch_size=False):
+def layer_test(
+    layer_cls,
+    kwargs={},
+    input_shape=None,
+    input_dtype=None,
+    input_data=None,
+    expected_output=None,
+    expected_output_dtype=None,
+    fixed_batch_size=False,
+):
     """Test routine for a layer with a single input tensor
     and single output tensor.
 
@@ -56,7 +68,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         for i, e in enumerate(input_data_shape):
             if e is None:
                 input_data_shape[i] = np.random.randint(1, 4)
-        input_data = (10 * np.random.random(input_data_shape))
+        input_data = 10 * np.random.random(input_data_shape)
         input_data = input_data.astype(input_dtype)
     else:
         if input_shape is None:
@@ -88,8 +100,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     actual_output = model.predict(input_data)
     actual_output_shape = actual_output.shape
-    for expected_dim, actual_dim in zip(expected_output_shape,
-                                        actual_output_shape):
+    for expected_dim, actual_dim in zip(expected_output_shape, actual_output_shape):
         if expected_dim is not None:
             assert expected_dim == actual_dim
 
@@ -108,13 +119,13 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     # test training mode (e.g. useful when the layer has a
     # different behavior at training and testing time).
-    if has_arg(layer.call, 'training'):
-        model.compile('rmsprop', 'mse')
+    if has_arg(layer.call, "training"):
+        model.compile("rmsprop", "mse")
         model.train_on_batch(input_data, actual_output)
 
     # test instantiation from layer config
     layer_config = layer.get_config()
-    layer_config['batch_input_shape'] = input_shape
+    layer_config["batch_input_shape"] = input_shape
     layer = layer.__class__.from_config(layer_config)
 
     # for further checks in the caller function
@@ -151,8 +162,7 @@ def has_arg(fn, name, accept_all=False):
         arg_spec = inspect.getfullargspec(fn)
         if accept_all and arg_spec.varkw is not None:
             return True
-        return (name in arg_spec.args or
-                name in arg_spec.kwonlyargs)
+        return name in arg_spec.args or name in arg_spec.kwonlyargs
     else:
         signature = inspect.signature(fn)
         parameter = signature.parameters.get(name)
@@ -162,8 +172,10 @@ def has_arg(fn, name, accept_all=False):
                     if param.kind == inspect.Parameter.VAR_KEYWORD:
                         return True
             return False
-        return (parameter.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                                   inspect.Parameter.KEYWORD_ONLY))
+        return parameter.kind in (
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
 
 
 def to_list(x, allow_tuple=False):
@@ -180,12 +192,12 @@ def unpack_singleton(x):
     return x
 
 
-if keras.__name__ == 'keras':
+if keras.__name__ == "keras":
     is_tf_keras = False
-elif keras.__name__ == 'tensorflow.keras':
+elif keras.__name__ == "tensorflow.keras":
     is_tf_keras = True
 else:
-    raise KeyError('Cannot detect if using keras or tf.keras.')
+    raise KeyError("Cannot detect if using keras or tf.keras.")
 
 
 def to_tuple(shape):
@@ -200,6 +212,7 @@ def to_tuple(shape):
     """
     if is_tf_keras:
         import tensorflow as tf
+
         return tuple(tf.TensorShape(shape).as_list())
     else:
         return shape

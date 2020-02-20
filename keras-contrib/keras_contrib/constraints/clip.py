@@ -17,5 +17,4 @@ class Clip(Constraint):
         return K.clip(p, -self.c, self.c)
 
     def get_config(self):
-        return {'name': self.__class__.__name__,
-                'c': self.c}
+        return {"name": self.__class__.__name__, "c": self.c}

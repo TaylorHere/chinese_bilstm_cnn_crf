@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 import argparse
 import gensim
 from data_preprocess import DataPreprocess
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, TerminateOnNaN, EarlyStopping, TensorBoard
 from data_generate import generate_batch
 
 from paths import TrainPath
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--train_dir", help="train directory", default="/home/jovyan/shared/", type=str
@@ -32,6 +33,7 @@ dataPreprocess = DataPreprocess(trainPath)
 
 
 from log import setUpLogger
+
 setUpLogger(trainPath)
 
 embedding_model = gensim.models.Word2Vec.load(trainPath.model_vector_path)
@@ -40,7 +42,7 @@ logger.info("step-4--->" + u"对语料中的词统计排序生成索引" + "--->
 lexicon, lexicon_reverse = dataPreprocess.create_lexicon(word_dict)
 
 logger.info("step-9--->" + u"模型创建" + "--->START")
-from bilstm_cnn_crf import bilstm_cnn_crf
+from bilstm_cnn_crf import BiLSTM_CNN_CRF
 
 embedding_model = gensim.models.Word2Vec.load(trainPath.model_vector_path)
 embedding_size = embedding_model.vector_size
@@ -48,7 +50,7 @@ useful_word_length, embedding_weights = dataPreprocess.create_embedding(
     embedding_model, embedding_size, lexicon_reverse
 )
 
-model = bilstm_cnn_crf(
+model = BiLSTM_CNN_CRF(
     args.max_len,
     useful_word_length + 2,
     args.label_2_index_length,
@@ -69,16 +71,40 @@ checkpoint = ModelCheckpoint(
     mode="max",
 )
 
+earlyStopping = EarlyStopping(
+    monitor="val_loss",
+    min_delta=0,
+    patience=0,
+    verbose=0,
+    mode="auto",
+    baseline=None,
+    restore_best_weights=False,
+)
+tensorBoard = TensorBoard(
+    log_dir=trainPath.traning_log_basepath,
+    histogram_freq=0,
+    batch_size=args.batch_size,
+    write_graph=True,
+    write_grads=False,
+    write_images=False,
+    embeddings_freq=0,
+    embeddings_layer_names=None,
+    embeddings_metadata=None,
+    embeddings_data=None,
+    update_freq="epoch",
+)
+
 _ = model.fit_generator(
     generator=generate_batch(
         trainPath=trainPath,
-        batch_size=args.batch_size, label_class=args.label_2_index_length
+        batch_size=args.batch_size,
+        label_class=args.label_2_index_length,
     ),
     steps_per_epoch=int(args.documents_length / args.batch_size),
     epochs=args.epochs,
     verbose=1,
     workers=1,
-    callbacks=[checkpoint],
+    callbacks=[checkpoint, tensorBoard, earlyStopping],
 )
 
 logger.info("step-11--->" + u"模型和字典保存" + "--->START")

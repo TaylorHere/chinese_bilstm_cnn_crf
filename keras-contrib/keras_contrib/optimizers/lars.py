@@ -27,14 +27,16 @@ class LARS(Optimizer):
         nesterov: when set to True, nesterov momentum will be enabled
     """
 
-    def __init__(self,
-                 lr,
-                 momentum=0.9,
-                 weight_decay=0.0001,
-                 eeta=0.001,
-                 epsilon=0.0,
-                 nesterov=False,
-                 **kwargs):
+    def __init__(
+        self,
+        lr,
+        momentum=0.9,
+        weight_decay=0.0001,
+        eeta=0.001,
+        epsilon=0.0,
+        nesterov=False,
+        **kwargs
+    ):
 
         if momentum < 0.0:
             raise ValueError("momentum should be positive: %s" % momentum)
@@ -42,11 +44,11 @@ class LARS(Optimizer):
             raise ValueError("weight_decay is not positive: %s" % weight_decay)
         super(LARS, self).__init__(**kwargs)
         with K.name_scope(self.__class__.__name__):
-            self.iterations = K.variable(0, dtype='int64', name='iterations')
-            self.lr = K.variable(lr, name='lr')
-            self.momentum = K.variable(momentum, name='momentum')
-            self.weight_decay = K.variable(weight_decay, name='weight_decay')
-            self.eeta = K.variable(eeta, name='eeta')
+            self.iterations = K.variable(0, dtype="int64", name="iterations")
+            self.lr = K.variable(lr, name="lr")
+            self.momentum = K.variable(momentum, name="momentum")
+            self.weight_decay = K.variable(weight_decay, name="weight_decay")
+            self.eeta = K.variable(eeta, name="eeta")
         self.epsilon = epsilon
         self.nesterov = nesterov
 
@@ -55,23 +57,29 @@ class LARS(Optimizer):
         weights = self.get_weights()
         self.updates = [K.update_add(self.iterations, 1)]
         scaled_lr = self.lr
-        w_norm = K.sqrt(K.sum([K.sum(K.square(weight))
-                               for weight in weights]))
-        g_norm = K.sqrt(K.sum([K.sum(K.square(grad))
-                               for grad in grads]))
-        scaled_lr = K.switch(K.greater(w_norm * g_norm, K.zeros([1])),
-                             K.expand_dims((self.eeta * w_norm /
-                                            (g_norm + self.weight_decay * w_norm +
-                                             self.epsilon)) * self.lr),
-                             K.ones([1]) * self.lr)
-        if K.backend() == 'theano':
+        w_norm = K.sqrt(K.sum([K.sum(K.square(weight)) for weight in weights]))
+        g_norm = K.sqrt(K.sum([K.sum(K.square(grad)) for grad in grads]))
+        scaled_lr = K.switch(
+            K.greater(w_norm * g_norm, K.zeros([1])),
+            K.expand_dims(
+                (
+                    self.eeta
+                    * w_norm
+                    / (g_norm + self.weight_decay * w_norm + self.epsilon)
+                )
+                * self.lr
+            ),
+            K.ones([1]) * self.lr,
+        )
+        if K.backend() == "theano":
             scaled_lr = scaled_lr[0]  # otherwise theano raise broadcasting error
         # momentum
-        moments = [K.zeros(K.int_shape(param), dtype=K.dtype(param))
-                   for param in params]
+        moments = [
+            K.zeros(K.int_shape(param), dtype=K.dtype(param)) for param in params
+        ]
         self.weights = [self.iterations] + moments
         for param, grad, moment in zip(params, grads, moments):
-            v0 = (moment * self.momentum)
+            v0 = moment * self.momentum
             v1 = scaled_lr * grad  # velocity
             veloc = v0 - v1
             self.updates.append(K.update(moment, veloc))
@@ -82,18 +90,20 @@ class LARS(Optimizer):
                 new_param = param + veloc
 
             # Apply constraints.
-            if getattr(param, 'constraint', None) is not None:
+            if getattr(param, "constraint", None) is not None:
                 new_param = param.constraint(new_param)
 
             self.updates.append(K.update(param, new_param))
         return self.updates
 
     def get_config(self):
-        config = {'lr': float(K.get_value(self.lr)),
-                  'momentum': float(K.get_value(self.momentum)),
-                  'weight_decay': float(K.get_value(self.weight_decay)),
-                  'epsilon': self.epsilon,
-                  'eeta': float(K.get_value(self.eeta)),
-                  'nesterov': self.nesterov}
+        config = {
+            "lr": float(K.get_value(self.lr)),
+            "momentum": float(K.get_value(self.momentum)),
+            "weight_decay": float(K.get_value(self.weight_decay)),
+            "epsilon": self.epsilon,
+            "eeta": float(K.get_value(self.eeta)),
+            "nesterov": self.nesterov,
+        }
         base_config = super(LARS, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

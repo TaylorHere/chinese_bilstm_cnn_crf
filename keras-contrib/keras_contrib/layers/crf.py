@@ -192,38 +192,41 @@ class CRF(Layer):
 
     """
 
-    def __init__(self, units,
-                 learn_mode='join',
-                 test_mode=None,
-                 sparse_target=False,
-                 use_boundary=True,
-                 use_bias=True,
-                 activation='linear',
-                 kernel_initializer='glorot_uniform',
-                 chain_initializer='orthogonal',
-                 bias_initializer='zeros',
-                 boundary_initializer='zeros',
-                 kernel_regularizer=None,
-                 chain_regularizer=None,
-                 boundary_regularizer=None,
-                 bias_regularizer=None,
-                 kernel_constraint=None,
-                 chain_constraint=None,
-                 boundary_constraint=None,
-                 bias_constraint=None,
-                 input_dim=None,
-                 unroll=False,
-                 **kwargs):
+    def __init__(
+        self,
+        units,
+        learn_mode="join",
+        test_mode=None,
+        sparse_target=False,
+        use_boundary=True,
+        use_bias=True,
+        activation="linear",
+        kernel_initializer="glorot_uniform",
+        chain_initializer="orthogonal",
+        bias_initializer="zeros",
+        boundary_initializer="zeros",
+        kernel_regularizer=None,
+        chain_regularizer=None,
+        boundary_regularizer=None,
+        bias_regularizer=None,
+        kernel_constraint=None,
+        chain_constraint=None,
+        boundary_constraint=None,
+        bias_constraint=None,
+        input_dim=None,
+        unroll=False,
+        **kwargs
+    ):
         super(CRF, self).__init__(**kwargs)
         self.supports_masking = True
         self.units = units
         self.learn_mode = learn_mode
-        assert self.learn_mode in ['join', 'marginal']
+        assert self.learn_mode in ["join", "marginal"]
         self.test_mode = test_mode
         if self.test_mode is None:
-            self.test_mode = 'viterbi' if self.learn_mode == 'join' else 'marginal'
+            self.test_mode = "viterbi" if self.learn_mode == "join" else "marginal"
         else:
-            assert self.test_mode in ['viterbi', 'marginal']
+            assert self.test_mode in ["viterbi", "marginal"]
         self.sparse_target = sparse_target
         self.use_boundary = use_boundary
         self.use_bias = use_bias
@@ -252,53 +255,63 @@ class CRF(Layer):
         self.input_spec = [InputSpec(shape=input_shape)]
         self.input_dim = input_shape[-1]
 
-        self.kernel = self.add_weight(shape=(self.input_dim, self.units),
-                                      name='kernel',
-                                      initializer=self.kernel_initializer,
-                                      regularizer=self.kernel_regularizer,
-                                      constraint=self.kernel_constraint)
-        self.chain_kernel = self.add_weight(shape=(self.units, self.units),
-                                            name='chain_kernel',
-                                            initializer=self.chain_initializer,
-                                            regularizer=self.chain_regularizer,
-                                            constraint=self.chain_constraint)
+        self.kernel = self.add_weight(
+            shape=(self.input_dim, self.units),
+            name="kernel",
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
+        self.chain_kernel = self.add_weight(
+            shape=(self.units, self.units),
+            name="chain_kernel",
+            initializer=self.chain_initializer,
+            regularizer=self.chain_regularizer,
+            constraint=self.chain_constraint,
+        )
         if self.use_bias:
-            self.bias = self.add_weight(shape=(self.units,),
-                                        name='bias',
-                                        initializer=self.bias_initializer,
-                                        regularizer=self.bias_regularizer,
-                                        constraint=self.bias_constraint)
+            self.bias = self.add_weight(
+                shape=(self.units,),
+                name="bias",
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+            )
         else:
             self.bias = 0
 
         if self.use_boundary:
-            self.left_boundary = self.add_weight(shape=(self.units,),
-                                                 name='left_boundary',
-                                                 initializer=self.boundary_initializer,
-                                                 regularizer=self.boundary_regularizer,
-                                                 constraint=self.boundary_constraint)
-            self.right_boundary = self.add_weight(shape=(self.units,),
-                                                  name='right_boundary',
-                                                  initializer=self.boundary_initializer,
-                                                  regularizer=self.boundary_regularizer,
-                                                  constraint=self.boundary_constraint)
+            self.left_boundary = self.add_weight(
+                shape=(self.units,),
+                name="left_boundary",
+                initializer=self.boundary_initializer,
+                regularizer=self.boundary_regularizer,
+                constraint=self.boundary_constraint,
+            )
+            self.right_boundary = self.add_weight(
+                shape=(self.units,),
+                name="right_boundary",
+                initializer=self.boundary_initializer,
+                regularizer=self.boundary_regularizer,
+                constraint=self.boundary_constraint,
+            )
         self.built = True
 
     def call(self, X, mask=None):
         if mask is not None:
-            assert K.ndim(mask) == 2, 'Input mask to CRF must have dim 2 if not None'
+            assert K.ndim(mask) == 2, "Input mask to CRF must have dim 2 if not None"
 
-        if self.test_mode == 'viterbi':
+        if self.test_mode == "viterbi":
             test_output = self.viterbi_decoding(X, mask)
         else:
             test_output = self.get_marginal_prob(X, mask)
 
         self.uses_learning_phase = True
-        if self.learn_mode == 'join':
+        if self.learn_mode == "join":
             train_output = K.zeros_like(K.dot(X, self.kernel))
             out = K.in_train_phase(train_output, test_output)
         else:
-            if self.test_mode == 'viterbi':
+            if self.test_mode == "viterbi":
                 train_output = self.get_marginal_prob(X, mask)
                 out = K.in_train_phase(train_output, test_output)
             else:
@@ -309,67 +322,74 @@ class CRF(Layer):
         return input_shape[:2] + (self.units,)
 
     def compute_mask(self, input, mask=None):
-        if mask is not None and self.learn_mode == 'join':
+        if mask is not None and self.learn_mode == "join":
             return K.any(mask, axis=1)
         return mask
 
     def get_config(self):
         config = {
-            'units': self.units,
-            'learn_mode': self.learn_mode,
-            'test_mode': self.test_mode,
-            'use_boundary': self.use_boundary,
-            'use_bias': self.use_bias,
-            'sparse_target': self.sparse_target,
-            'kernel_initializer': initializers.serialize(self.kernel_initializer),
-            'chain_initializer': initializers.serialize(self.chain_initializer),
-            'boundary_initializer': initializers.serialize(
-                self.boundary_initializer),
-            'bias_initializer': initializers.serialize(self.bias_initializer),
-            'activation': activations.serialize(self.activation),
-            'kernel_regularizer': regularizers.serialize(self.kernel_regularizer),
-            'chain_regularizer': regularizers.serialize(self.chain_regularizer),
-            'boundary_regularizer': regularizers.serialize(
-                self.boundary_regularizer),
-            'bias_regularizer': regularizers.serialize(self.bias_regularizer),
-            'kernel_constraint': constraints.serialize(self.kernel_constraint),
-            'chain_constraint': constraints.serialize(self.chain_constraint),
-            'boundary_constraint': constraints.serialize(self.boundary_constraint),
-            'bias_constraint': constraints.serialize(self.bias_constraint),
-            'input_dim': self.input_dim,
-            'unroll': self.unroll}
+            "units": self.units,
+            "learn_mode": self.learn_mode,
+            "test_mode": self.test_mode,
+            "use_boundary": self.use_boundary,
+            "use_bias": self.use_bias,
+            "sparse_target": self.sparse_target,
+            "kernel_initializer": initializers.serialize(self.kernel_initializer),
+            "chain_initializer": initializers.serialize(self.chain_initializer),
+            "boundary_initializer": initializers.serialize(self.boundary_initializer),
+            "bias_initializer": initializers.serialize(self.bias_initializer),
+            "activation": activations.serialize(self.activation),
+            "kernel_regularizer": regularizers.serialize(self.kernel_regularizer),
+            "chain_regularizer": regularizers.serialize(self.chain_regularizer),
+            "boundary_regularizer": regularizers.serialize(self.boundary_regularizer),
+            "bias_regularizer": regularizers.serialize(self.bias_regularizer),
+            "kernel_constraint": constraints.serialize(self.kernel_constraint),
+            "chain_constraint": constraints.serialize(self.chain_constraint),
+            "boundary_constraint": constraints.serialize(self.boundary_constraint),
+            "bias_constraint": constraints.serialize(self.bias_constraint),
+            "input_dim": self.input_dim,
+            "unroll": self.unroll,
+        }
         base_config = super(CRF, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
     @property
     def loss_function(self):
-        warnings.warn('CRF.loss_function is deprecated '
-                      'and it might be removed in the future. Please '
-                      'use losses.crf_loss instead.')
+        warnings.warn(
+            "CRF.loss_function is deprecated "
+            "and it might be removed in the future. Please "
+            "use losses.crf_loss instead."
+        )
         return crf_loss
 
     @property
     def accuracy(self):
-        warnings.warn('CRF.accuracy is deprecated and it '
-                      'might be removed in the future. Please '
-                      'use metrics.crf_accuracy')
-        if self.test_mode == 'viterbi':
+        warnings.warn(
+            "CRF.accuracy is deprecated and it "
+            "might be removed in the future. Please "
+            "use metrics.crf_accuracy"
+        )
+        if self.test_mode == "viterbi":
             return crf_viterbi_accuracy
         else:
             return crf_marginal_accuracy
 
     @property
     def viterbi_acc(self):
-        warnings.warn('CRF.viterbi_acc is deprecated and it might '
-                      'be removed in the future. Please '
-                      'use metrics.viterbi_acc instead.')
+        warnings.warn(
+            "CRF.viterbi_acc is deprecated and it might "
+            "be removed in the future. Please "
+            "use metrics.viterbi_acc instead."
+        )
         return crf_viterbi_accuracy
 
     @property
     def marginal_acc(self):
-        warnings.warn('CRF.moarginal_acc is deprecated and it '
-                      'might be removed in the future. Please '
-                      'use metrics.marginal_acc instead.')
+        warnings.warn(
+            "CRF.moarginal_acc is deprecated and it "
+            "might be removed in the future. Please "
+            "use metrics.marginal_acc instead."
+        )
         return crf_marginal_accuracy
 
     @staticmethod
@@ -393,10 +413,8 @@ class CRF(Layer):
         start = K.expand_dims(K.expand_dims(start, 0), 0)
         end = K.expand_dims(K.expand_dims(end, 0), 0)
         if mask is None:
-            energy = K.concatenate([energy[:, :1, :] + start, energy[:, 1:, :]],
-                                   axis=1)
-            energy = K.concatenate([energy[:, :-1, :], energy[:, -1:, :] + end],
-                                   axis=1)
+            energy = K.concatenate([energy[:, :1, :] + start, energy[:, 1:, :]], axis=1)
+            energy = K.concatenate([energy[:, :-1, :], energy[:, -1:, :] + end], axis=1)
         else:
             mask = K.expand_dims(K.cast(mask, K.floatx()))
             start_mask = K.cast(K.greater(mask, self.shift_right(mask)), K.floatx())
@@ -418,8 +436,9 @@ class CRF(Layer):
         """
         input_energy = K.sum(input_energy * y_true, 2)  # (B, T)
         # (B, T-1)
-        chain_energy = K.sum(K.dot(y_true[:, :-1, :],
-                                   self.chain_kernel) * y_true[:, 1:, :], 2)
+        chain_energy = K.sum(
+            K.dot(y_true[:, :-1, :], self.chain_kernel) * y_true[:, 1:, :], 2
+        )
 
         if mask is not None:
             mask = K.cast(mask, K.floatx())
@@ -437,12 +456,13 @@ class CRF(Layer):
         """
         input_energy = self.activation(K.dot(X, self.kernel) + self.bias)
         if self.use_boundary:
-            input_energy = self.add_boundary_energy(input_energy, mask,
-                                                    self.left_boundary,
-                                                    self.right_boundary)
+            input_energy = self.add_boundary_energy(
+                input_energy, mask, self.left_boundary, self.right_boundary
+            )
         energy = self.get_energy(y_true, input_energy, mask)
-        logZ = self.get_log_normalization_constant(input_energy, mask,
-                                                   input_length=K.int_shape(X)[1])
+        logZ = self.get_log_normalization_constant(
+            input_energy, mask, input_length=K.int_shape(X)[1]
+        )
         nloglik = logZ + energy
         if mask is not None:
             nloglik = nloglik / K.sum(K.cast(mask, K.floatx()), 1)
@@ -455,16 +475,17 @@ class CRF(Layer):
         # where B = batch_size, F = output feature dim
         # Note: `i` is of float32, due to the behavior of `K.rnn`
         prev_target_val, i, chain_energy = states[:3]
-        t = K.cast(i[0, 0], dtype='int32')
+        t = K.cast(i[0, 0], dtype="int32")
         if len(states) > 3:
-            if K.backend() == 'theano':
-                m = states[3][:, t:(t + 2)]
+            if K.backend() == "theano":
+                m = states[3][:, t : (t + 2)]
             else:
                 m = K.slice(states[3], [0, t], [-1, 2])
             input_energy_t = input_energy_t * K.expand_dims(m[:, 0])
             # (1, F, F)*(B, 1, 1) -> (B, F, F)
             chain_energy = chain_energy * K.expand_dims(
-                K.expand_dims(m[:, 0] * m[:, 1]))
+                K.expand_dims(m[:, 0] * m[:, 1])
+            )
         if return_logZ:
             # shapes: (1, B, F) + (B, F, 1) -> (B, F, F)
             energy = chain_energy + K.expand_dims(input_energy_t - prev_target_val, 2)
@@ -477,8 +498,15 @@ class CRF(Layer):
             argmin_table = K.cast(K.argmin(energy, 1), K.floatx())
             return argmin_table, [min_energy, i + 1]
 
-    def recursion(self, input_energy, mask=None, go_backwards=False,
-                  return_sequences=True, return_logZ=True, input_length=None):
+    def recursion(
+        self,
+        input_energy,
+        mask=None,
+        go_backwards=False,
+        return_sequences=True,
+        return_logZ=True,
+        input_length=None,
+    ):
         """Forward (alpha) or backward (beta) recursion
 
         If `return_logZ = True`, compute the logZ, the normalization constant:
@@ -513,18 +541,22 @@ class CRF(Layer):
         constants = [chain_energy]
 
         if mask is not None:
-            mask2 = K.cast(K.concatenate([mask, K.zeros_like(mask[:, :1])], axis=1),
-                           K.floatx())
+            mask2 = K.cast(
+                K.concatenate([mask, K.zeros_like(mask[:, :1])], axis=1), K.floatx()
+            )
             constants.append(mask2)
 
         def _step(input_energy_i, states):
             return self.step(input_energy_i, states, return_logZ)
 
-        target_val_last, target_val_seq, _ = K.rnn(_step, input_energy,
-                                                   initial_states,
-                                                   constants=constants,
-                                                   input_length=input_length,
-                                                   unroll=self.unroll)
+        target_val_last, target_val_seq, _ = K.rnn(
+            _step,
+            input_energy,
+            initial_states,
+            constants=constants,
+            input_length=input_length,
+            unroll=self.unroll,
+        )
 
         if return_sequences:
             if go_backwards:
@@ -542,14 +574,16 @@ class CRF(Layer):
     def get_marginal_prob(self, X, mask=None):
         input_energy = self.activation(K.dot(X, self.kernel) + self.bias)
         if self.use_boundary:
-            input_energy = self.add_boundary_energy(input_energy, mask,
-                                                    self.left_boundary,
-                                                    self.right_boundary)
+            input_energy = self.add_boundary_energy(
+                input_energy, mask, self.left_boundary, self.right_boundary
+            )
         input_length = K.int_shape(X)[1]
-        alpha = self.forward_recursion(input_energy, mask=mask,
-                                       input_length=input_length)
-        beta = self.backward_recursion(input_energy, mask=mask,
-                                       input_length=input_length)
+        alpha = self.forward_recursion(
+            input_energy, mask=mask, input_length=input_length
+        )
+        beta = self.backward_recursion(
+            input_energy, mask=mask, input_length=input_length
+        )
         if mask is not None:
             input_energy = input_energy * K.expand_dims(K.cast(mask, K.floatx()))
         margin = -(self.shift_right(alpha) + input_energy + self.shift_left(beta))
@@ -559,27 +593,31 @@ class CRF(Layer):
         input_energy = self.activation(K.dot(X, self.kernel) + self.bias)
         if self.use_boundary:
             input_energy = self.add_boundary_energy(
-                input_energy, mask, self.left_boundary, self.right_boundary)
+                input_energy, mask, self.left_boundary, self.right_boundary
+            )
 
         argmin_tables = self.recursion(input_energy, mask, return_logZ=False)
-        argmin_tables = K.cast(argmin_tables, 'int32')
+        argmin_tables = K.cast(argmin_tables, "int32")
 
         # backward to find best path, `initial_best_idx` can be any,
         # as all elements in the last argmin_table are the same
         argmin_tables = K.reverse(argmin_tables, 1)
         # matrix instead of vector is required by tf `K.rnn`
         initial_best_idx = [K.expand_dims(argmin_tables[:, 0, 0])]
-        if K.backend() == 'theano':
+        if K.backend() == "theano":
             from theano import tensor as T
+
             initial_best_idx = [T.unbroadcast(initial_best_idx[0], 1)]
 
         def gather_each_row(params, indices):
             n = K.shape(indices)[0]
-            if K.backend() == 'theano':
+            if K.backend() == "theano":
                 from theano import tensor as T
+
                 return params[T.arange(n), indices]
-            elif K.backend() == 'tensorflow':
+            elif K.backend() == "tensorflow":
                 import tensorflow as tf
+
                 indices = K.transpose(K.stack([tf.range(n), indices]))
                 return tf.gather_nd(params, indices)
             else:
@@ -588,13 +626,19 @@ class CRF(Layer):
         def find_path(argmin_table, best_idx):
             next_best_idx = gather_each_row(argmin_table, best_idx[0][:, 0])
             next_best_idx = K.expand_dims(next_best_idx)
-            if K.backend() == 'theano':
+            if K.backend() == "theano":
                 from theano import tensor as T
+
                 next_best_idx = T.unbroadcast(next_best_idx, 1)
             return next_best_idx, [next_best_idx]
 
-        _, best_paths, _ = K.rnn(find_path, argmin_tables, initial_best_idx,
-                                 input_length=K.int_shape(X)[1], unroll=self.unroll)
+        _, best_paths, _ = K.rnn(
+            find_path,
+            argmin_tables,
+            initial_best_idx,
+            input_length=K.int_shape(X)[1],
+            unroll=self.unroll,
+        )
         best_paths = K.reverse(best_paths, 1)
         best_paths = K.squeeze(best_paths, 2)
 

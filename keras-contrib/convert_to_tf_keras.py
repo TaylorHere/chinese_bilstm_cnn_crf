@@ -1,11 +1,13 @@
 import os
 import sys
 
-list_conversions = [('import keras.', 'import tensorflow.keras.'),
-                    ('import keras ', 'from tensorflow import keras '),
-                    ('import keras\n', 'from tensorflow import keras\n'),
-                    ('from keras.', 'from tensorflow.keras.'),
-                    ('from keras ', 'from tensorflow.keras ')]
+list_conversions = [
+    ("import keras.", "import tensorflow.keras."),
+    ("import keras ", "from tensorflow import keras "),
+    ("import keras\n", "from tensorflow import keras\n"),
+    ("from keras.", "from tensorflow.keras."),
+    ("from keras ", "from tensorflow.keras "),
+]
 
 
 def replace_imports_in_text(string, revert):
@@ -21,16 +23,16 @@ def replace_imports_in_text(string, revert):
 
 
 def replace_imports_in_file(file_path, revert):
-    if not file_path.endswith('.py'):
+    if not file_path.endswith(".py"):
         return False
     if os.path.abspath(file_path) == os.path.abspath(__file__):
         return False
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         text = f.read()
 
     text_updated = replace_imports_in_text(text, revert)
 
-    with open(file_path, 'w+') as f:
+    with open(file_path, "w+") as f:
         f.write(text_updated)
 
     return text_updated != text
@@ -43,8 +45,8 @@ def convert_codebase(revert):
         for name in files:
             if replace_imports_in_file(os.path.join(root, name), revert):
                 nb_of_files_changed += 1
-    print('Changed imports in ' + str(nb_of_files_changed) + ' files.')
-    print('Those files were found in the directory ' + keras_dir)
+    print("Changed imports in " + str(nb_of_files_changed) + " files.")
+    print("Those files were found in the directory " + keras_dir)
 
 
 def convert_to_tf_keras():
@@ -91,8 +93,8 @@ def test_replace_imports():
     assert python_code == replace_imports_in_text(code_with_replacement, True)
 
 
-if __name__ == '__main__':
-    if '--revert' in sys.argv:
+if __name__ == "__main__":
+    if "--revert" in sys.argv:
         convert_to_keras_team_keras()
     else:
         convert_to_tf_keras()

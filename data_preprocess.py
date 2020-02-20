@@ -8,8 +8,8 @@ Created on Thu May  3 09:12:11 2018
 import codecs
 import numpy as np
 
-class DataPreprocess():
 
+class DataPreprocess:
     def __init__(self, trainPath):
         self.trainPath = trainPath
 
@@ -73,11 +73,9 @@ class DataPreprocess():
 
         return documents_length
 
-
     def create_useful_words(self, embedding_model):
 
         return list(embedding_model.wv.vocab.keys())
-
 
     def create_lexicon(self, word_dict):
         """ 生成词典 """
@@ -97,7 +95,9 @@ class DataPreprocess():
         sorted_chars = sorted(chars.items(), key=lambda x: x[1], reverse=True)
 
         # 下标从1开始 0用来补长
-        lexicon = dict([(item[0], index + 1) for index, item in enumerate(sorted_chars)])
+        lexicon = dict(
+            [(item[0], index + 1) for index, item in enumerate(sorted_chars)]
+        )
 
         del sorted_chars
 
@@ -110,16 +110,13 @@ class DataPreprocess():
 
         return lexicon, lexicon_reverse
 
-
     def create_label_index(self):
 
         return {"P": 0, "B": 1, "M": 2, "E": 3, "S": 4, "U": 5}
 
-
     def create_index_label(self):
 
         return {0: "Pad", 1: "B", 2: "M", 3: "E", 4: "S", 5: "Unk"}
-
 
     def create_embedding(self, embedding_model, embedding_size, lexicon_reverse):
 
@@ -144,7 +141,6 @@ class DataPreprocess():
         embedding_weights[-1] = np.random.uniform(-1, 1, embedding_size)
 
         return useful_word_length, embedding_weights
-
 
     def create_matrix(self, lexicon, label_2_index):
 
@@ -178,14 +174,17 @@ class DataPreprocess():
         data_index.close()
         label_index.close()
 
-
     def padding_sentences(self, max_len):
 
         data_index = codecs.open(self.trainPath.data_index_path, "r", "utf-8")
         label_index = codecs.open(self.trainPath.label_index_path, "r", "utf-8")
 
-        data_index_padding = codecs.open(self.trainPath.data_index_padding_path, "w", "utf-8")
-        label_index_padding = codecs.open(self.trainPath.label_index_padding_path, "w", "utf-8")
+        data_index_padding = codecs.open(
+            self.trainPath.data_index_padding_path, "w", "utf-8"
+        )
+        label_index_padding = codecs.open(
+            self.trainPath.label_index_padding_path, "w", "utf-8"
+        )
 
         data_line = data_index.readline()
 
@@ -237,7 +236,6 @@ class DataPreprocess():
         label_index.close()
         data_index_padding.close()
         label_index_padding.close()
-
 
     def maxlen_2d_list(self):
 

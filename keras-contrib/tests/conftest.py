@@ -9,5 +9,5 @@ def clear_session_after_test():
     This wrapper runs for all the tests in the keras test suite.
     """
     yield
-    if K.backend() == 'tensorflow' or K.backend() == 'cntk':
+    if K.backend() == "tensorflow" or K.backend() == "cntk":
         K.clear_session()

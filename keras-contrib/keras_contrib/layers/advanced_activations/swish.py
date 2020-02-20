@@ -32,9 +32,9 @@ class Swish(Layer):
         self.trainable = trainable
 
     def build(self, input_shape):
-        self.scaling_factor = K.variable(self.beta,
-                                         dtype=K.floatx(),
-                                         name='scaling_factor')
+        self.scaling_factor = K.variable(
+            self.beta, dtype=K.floatx(), name="scaling_factor"
+        )
         if self.trainable:
             self._trainable_weights.append(self.scaling_factor)
         super(Swish, self).build(input_shape)
@@ -43,8 +43,10 @@ class Swish(Layer):
         return inputs * K.sigmoid(self.scaling_factor * inputs)
 
     def get_config(self):
-        config = {'beta': self.get_weights()[0] if self.trainable else self.beta,
-                  'trainable': self.trainable}
+        config = {
+            "beta": self.get_weights()[0] if self.trainable else self.beta,
+            "trainable": self.trainable,
+        }
         base_config = super(Swish, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

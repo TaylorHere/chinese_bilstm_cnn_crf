@@ -16,27 +16,34 @@ input_shapes = [np.ones((10, 10)), np.ones((10, 10, 10))]
 
 def basic_instancenorm_test():
     from keras import regularizers
-    layer_test(InstanceNormalization,
-               kwargs={'epsilon': 0.1,
-                       'gamma_regularizer': regularizers.l2(0.01),
-                       'beta_regularizer': regularizers.l2(0.01)},
-               input_shape=(3, 4, 2))
-    layer_test(InstanceNormalization,
-               kwargs={'gamma_initializer': 'ones',
-                       'beta_initializer': 'ones'},
-               input_shape=(3, 4, 2))
-    layer_test(InstanceNormalization,
-               kwargs={'scale': False, 'center': False},
-               input_shape=(3, 3))
+
+    layer_test(
+        InstanceNormalization,
+        kwargs={
+            "epsilon": 0.1,
+            "gamma_regularizer": regularizers.l2(0.01),
+            "beta_regularizer": regularizers.l2(0.01),
+        },
+        input_shape=(3, 4, 2),
+    )
+    layer_test(
+        InstanceNormalization,
+        kwargs={"gamma_initializer": "ones", "beta_initializer": "ones"},
+        input_shape=(3, 4, 2),
+    )
+    layer_test(
+        InstanceNormalization,
+        kwargs={"scale": False, "center": False},
+        input_shape=(3, 3),
+    )
 
 
-@pytest.mark.parametrize('input_shape,axis', [((10, 1), -1),
-                                              ((10,), None)])
+@pytest.mark.parametrize("input_shape,axis", [((10, 1), -1), ((10,), None)])
 def test_instancenorm_correctness_rank2(input_shape, axis):
     model = Sequential()
     norm = InstanceNormalization(input_shape=input_shape, axis=axis)
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000,) + input_shape)
@@ -59,7 +66,7 @@ def test_instancenorm_training_argument():
     x = np.random.normal(loc=5.0, scale=10.0, size=(20, 10))
     output_a = model1.predict(x)
 
-    model1.compile(loss='mse', optimizer='rmsprop')
+    model1.compile(loss="mse", optimizer="rmsprop")
     model1.fit(x, x, epochs=1, verbose=0)
     output_b = model1.predict(x)
     assert np.abs(np.sum(output_a - output_b)) > 0.1
@@ -75,7 +82,7 @@ def test_instancenorm_convnet():
     model = Sequential()
     norm = InstanceNormalization(axis=1, input_shape=(3, 4, 4))
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 3, 4, 4))
@@ -89,9 +96,9 @@ def test_instancenorm_convnet():
 
 
 def test_shared_instancenorm():
-    '''Test that a IN layer can be shared
+    """Test that a IN layer can be shared
     across different data streams.
-    '''
+    """
     # Test single layer reuse
     bn = InstanceNormalization(input_shape=(10,))
     x1 = Input(shape=(10,))
@@ -102,14 +109,14 @@ def test_shared_instancenorm():
 
     x = np.random.normal(loc=5.0, scale=10.0, size=(2, 10))
     model = Model(x2, y2)
-    model.compile('sgd', 'mse')
+    model.compile("sgd", "mse")
     model.train_on_batch(x, x)
 
     # Test model-level reuse
     x3 = Input(shape=(10,))
     y3 = model(x3)
     new_model = Model(x3, y3)
-    new_model.compile('sgd', 'mse')
+    new_model.compile("sgd", "mse")
     new_model.train_on_batch(x, x)
 
 
@@ -117,7 +124,7 @@ def test_instancenorm_perinstancecorrectness():
     model = Sequential()
     norm = InstanceNormalization(input_shape=(10,))
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     # bimodal distribution
     z = np.random.normal(loc=5.0, scale=10.0, size=(2, 10))
@@ -152,12 +159,11 @@ def test_instancenorm_perchannel_correctness():
 
     # this model does not provide a normalization axis
     model = Sequential()
-    norm = InstanceNormalization(axis=None,
-                                 input_shape=(3, 4, 4),
-                                 center=False,
-                                 scale=False)
+    norm = InstanceNormalization(
+        axis=None, input_shape=(3, 4, 4), center=False, scale=False
+    )
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
     model.fit(batch, batch, epochs=4, verbose=0)
     out = model.predict(batch)
 
@@ -175,12 +181,11 @@ def test_instancenorm_perchannel_correctness():
 
     # this model sets the channel as a normalization axis
     model = Sequential()
-    norm = InstanceNormalization(axis=1,
-                                 input_shape=(3, 4, 4),
-                                 center=False,
-                                 scale=False)
+    norm = InstanceNormalization(
+        axis=1, input_shape=(3, 4, 4), center=False, scale=False
+    )
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     model.fit(batch, batch, epochs=4, verbose=0)
     out = model.predict(batch)
@@ -193,5 +198,5 @@ def test_instancenorm_perchannel_correctness():
             assert_allclose(activations.std(), 1.0, atol=1e-1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

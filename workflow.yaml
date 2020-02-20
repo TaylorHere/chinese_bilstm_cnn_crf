@@ -32,8 +32,6 @@ spec:
       value: T4
     - name: gpu-limits
       value: 1
-    - name: snapshot-id
-      value: imc-2zeiyuxvb2sb2zyg4rre
   volumes:
     - name: workdir
       persistentVolumeClaim:
@@ -130,7 +128,6 @@ spec:
                   annotations:
                     k8s.aliyun.com/eci-gpu-type: "{{workflow.parameters.gpu-type}}"
                     k8s.aliyun.com/eci-image-cache: "true"
-                    k8s.aliyun.com/eci-image-snapshot-id: "{{workflow.parameters.snapshot-id}}"
                   name: trainer-job
                 spec:
                   restartPolicy: Never
@@ -148,8 +145,12 @@ spec:
                     command:
                       - python
                       - train.py
-                      - --corpus_path
-                      - /home/jovyan/shared/corpus/2014/
+                      - --train_dir=/home/jovyan/shared/
+                      - --max_len=306
+                      - --documents_length=2531574
+                      - --label_2_index_length=6
+                      - --batch_size=256
+                      - --epochs=3
                     volumeMounts:
                       - name: workdir
                         mountPath: "{{workflow.parameters.train-data-mount-path}}"

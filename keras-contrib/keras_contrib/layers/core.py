@@ -83,14 +83,22 @@ class CosineDense(Layer):
            of Dot Product in Neural Networks](https://arxiv.org/pdf/1702.05870.pdf)
     """
 
-    def __init__(self, units, kernel_initializer='glorot_uniform',
-                 activation=None, weights=None,
-                 kernel_regularizer=None, bias_regularizer=None,
-                 activity_regularizer=None,
-                 kernel_constraint=None, bias_constraint=None,
-                 use_bias=True, **kwargs):
-        if 'input_shape' not in kwargs and 'input_dim' in kwargs:
-            kwargs['input_shape'] = (kwargs.pop('input_dim'),)
+    def __init__(
+        self,
+        units,
+        kernel_initializer="glorot_uniform",
+        activation=None,
+        weights=None,
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        use_bias=True,
+        **kwargs
+    ):
+        if "input_shape" not in kwargs and "input_dim" in kwargs:
+            kwargs["input_shape"] = (kwargs.pop("input_dim"),)
 
         self.kernel_initializer = initializers.get(kernel_initializer)
         self.activation = activations.get(activation)
@@ -113,20 +121,23 @@ class CosineDense(Layer):
         assert ndim >= 2
         input_dim = input_shape[-1]
         self.input_dim = input_dim
-        self.input_spec = [InputSpec(dtype=K.floatx(),
-                                     ndim=ndim)]
+        self.input_spec = [InputSpec(dtype=K.floatx(), ndim=ndim)]
 
-        self.kernel = self.add_weight(shape=(input_dim, self.units),
-                                      initializer=self.kernel_initializer,
-                                      name='{}_W'.format(self.name),
-                                      regularizer=self.kernel_regularizer,
-                                      constraint=self.kernel_constraint)
+        self.kernel = self.add_weight(
+            shape=(input_dim, self.units),
+            initializer=self.kernel_initializer,
+            name="{}_W".format(self.name),
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
         if self.use_bias:
-            self.bias = self.add_weight(shape=(self.units,),
-                                        initializer='zero',
-                                        name='{}_b'.format(self.name),
-                                        regularizer=self.bias_regularizer,
-                                        constraint=self.bias_constraint)
+            self.bias = self.add_weight(
+                shape=(self.units,),
+                initializer="zero",
+                name="{}_b".format(self.name),
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+            )
         else:
             self.bias = None
 
@@ -137,22 +148,18 @@ class CosineDense(Layer):
 
     def call(self, x, mask=None):
         if self.use_bias:
-            b, xb = self.bias, 1.
+            b, xb = self.bias, 1.0
         else:
-            b, xb = 0., 0.
+            b, xb = 0.0, 0.0
 
-        xnorm = K.sqrt(K.sum(K.square(x), axis=-1, keepdims=True)
-                       + xb
-                       + K.epsilon())
-        Wnorm = K.sqrt(K.sum(K.square(self.kernel), axis=0)
-                       + K.square(b)
-                       + K.epsilon())
+        xnorm = K.sqrt(K.sum(K.square(x), axis=-1, keepdims=True) + xb + K.epsilon())
+        Wnorm = K.sqrt(K.sum(K.square(self.kernel), axis=0) + K.square(b) + K.epsilon())
 
-        xWnorm = (xnorm * Wnorm)
+        xWnorm = xnorm * Wnorm
 
         output = K.dot(x, self.kernel) / xWnorm
         if self.use_bias:
-            output += (self.bias / xWnorm)
+            output += self.bias / xWnorm
         return self.activation(output)
 
     def compute_output_shape(self, input_shape):
@@ -165,16 +172,15 @@ class CosineDense(Layer):
 
     def get_config(self):
         config = {
-            'units': self.units,
-            'kernel_initializer': initializers.serialize(self.kernel_initializer),
-            'activation': activations.serialize(self.activation),
-            'kernel_regularizer': regularizers.serialize(self.kernel_regularizer),
-            'bias_regularizer': regularizers.serialize(self.bias_regularizer),
-            'activity_regularizer':
-                regularizers.serialize(self.activity_regularizer),
-            'kernel_constraint': constraints.serialize(self.kernel_constraint),
-            'bias_constraint': constraints.serialize(self.bias_constraint),
-            'use_bias': self.use_bias
+            "units": self.units,
+            "kernel_initializer": initializers.serialize(self.kernel_initializer),
+            "activation": activations.serialize(self.activation),
+            "kernel_regularizer": regularizers.serialize(self.kernel_regularizer),
+            "bias_regularizer": regularizers.serialize(self.bias_regularizer),
+            "activity_regularizer": regularizers.serialize(self.activity_regularizer),
+            "kernel_constraint": constraints.serialize(self.kernel_constraint),
+            "bias_constraint": constraints.serialize(self.bias_constraint),
+            "use_bias": self.use_bias,
         }
         base_config = super(CosineDense, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

@@ -6,11 +6,11 @@ import numpy as np
 # Test and plot
 y_pred = np.array([np.arange(-10, 10 + 0.1, 0.1)]).T
 y_true = np.zeros(y_pred.shape)
-name = 'jaccard_distance_loss'
+name = "jaccard_distance_loss"
 try:
-    loss = jaccard_distance_loss(
-        K.variable(y_true), K.variable(y_pred)
-    ).eval(session=K.get_session())
+    loss = jaccard_distance_loss(K.variable(y_true), K.variable(y_pred)).eval(
+        session=K.get_session()
+    )
 except Exception as e:
     print("error plotting", name, e)
 else:
@@ -19,23 +19,21 @@ else:
     plt.show()
 
 print("TYPE                 |Almost_right |half right |all_wrong")
-y_true = np.array([[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1., 0.]])
-y_pred = np.array([[0, 0, 0.9, 0], [0, 0, 0.1, 0], [1, 1, 0.1, 1.]])
+y_true = np.array([[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1.0, 0.0]])
+y_pred = np.array([[0, 0, 0.9, 0], [0, 0, 0.1, 0], [1, 1, 0.1, 1.0]])
 
-r = jaccard_distance(
-    K.variable(y_true),
-    K.variable(y_pred),
-).eval(session=K.get_session())
-print('jaccard_distance_loss', r)
+r = jaccard_distance(K.variable(y_true), K.variable(y_pred)).eval(
+    session=K.get_session()
+)
+print("jaccard_distance_loss", r)
 assert r[0] < r[1]
 assert r[1] < r[2]
 
-r = keras.losses.binary_crossentropy(
-    K.variable(y_true),
-    K.variable(y_pred),
-).eval(session=K.get_session())
-print('binary_crossentropy', r)
-print('binary_crossentropy_scaled', r / r.max())
+r = keras.losses.binary_crossentropy(K.variable(y_true), K.variable(y_pred)).eval(
+    session=K.get_session()
+)
+print("binary_crossentropy", r)
+print("binary_crossentropy_scaled", r / r.max())
 assert r[0] < r[1]
 assert r[1] < r[2]
 

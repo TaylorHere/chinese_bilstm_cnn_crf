@@ -61,13 +61,14 @@ class ConvolutionAware(Initializer):
 
         init = []
         for i in range(filters_size):
-            basis = self._create_basis(
-                stack_size, np.prod(kernel_fourier_shape))
+            basis = self._create_basis(stack_size, np.prod(kernel_fourier_shape))
             basis = basis.reshape((stack_size,) + kernel_fourier_shape)
 
-            filters = [correct_ifft(x, kernel_shape) +
-                       np.random.normal(0, self.eps_std, kernel_shape) for
-                       x in basis]
+            filters = [
+                correct_ifft(x, kernel_shape)
+                + np.random.normal(0, self.eps_std, kernel_shape)
+                for x in basis
+            ]
 
             init.append(filters)
 
@@ -99,13 +100,10 @@ class ConvolutionAware(Initializer):
         return filters * p
 
     def get_config(self):
-        return {
-            'eps_std': self.eps_std,
-            'seed': self.seed
-        }
+        return {"eps_std": self.eps_std, "seed": self.seed}
 
 
-def _compute_fans(shape, data_format='channels_last'):
+def _compute_fans(shape, data_format="channels_last"):
     """Computes the number of input and output units for a weight shape.
 
     # Arguments
@@ -128,16 +126,16 @@ def _compute_fans(shape, data_format='channels_last'):
         # Assuming convolution kernels (1D, 2D or 3D).
         # TH kernel shape: (depth, input_depth, ...)
         # TF kernel shape: (..., input_depth, depth)
-        if data_format == 'channels_first':
+        if data_format == "channels_first":
             receptive_field_size = np.prod(shape[2:])
             fan_in = shape[1] * receptive_field_size
             fan_out = shape[0] * receptive_field_size
-        elif data_format == 'channels_last':
+        elif data_format == "channels_last":
             receptive_field_size = np.prod(shape[:-2])
             fan_in = shape[-2] * receptive_field_size
             fan_out = shape[-1] * receptive_field_size
         else:
-            raise ValueError('Invalid data_format: ' + data_format)
+            raise ValueError("Invalid data_format: " + data_format)
     else:
         # No specific assumptions.
         fan_in = np.sqrt(np.prod(shape))

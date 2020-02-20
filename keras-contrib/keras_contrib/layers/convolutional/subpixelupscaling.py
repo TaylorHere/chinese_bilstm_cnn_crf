@@ -81,7 +81,7 @@ class SubPixelUpscaling(Layer):
         return y
 
     def compute_output_shape(self, input_shape):
-        if self.data_format == 'channels_first':
+        if self.data_format == "channels_first":
             b, k, r, c = input_shape
             new_k = k // (self.scale_factor ** 2)
             new_r = r * self.scale_factor
@@ -95,7 +95,6 @@ class SubPixelUpscaling(Layer):
             return b, new_r, new_c, new_k
 
     def get_config(self):
-        config = {'scale_factor': self.scale_factor,
-                  'data_format': self.data_format}
+        config = {"scale_factor": self.scale_factor, "data_format": self.data_format}
         base_config = super(SubPixelUpscaling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

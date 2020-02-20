@@ -19,9 +19,9 @@ def _preprocess_conv2d_input(x, data_format):
     # Returns
         A tensor.
     """
-    if K.dtype(x) == 'float64':
-        x = tf.cast(x, 'float32')
-    if data_format == 'channels_first':
+    if K.dtype(x) == "float64":
+        x = tf.cast(x, "float32")
+    if data_format == "channels_first":
         # TF uses the last dimension as channel dimension,
         # instead of the 2nd one.
         # TH input shape: (samples, input_depth, rows, cols)
@@ -41,11 +41,11 @@ def _postprocess_conv2d_output(x, data_format):
         A tensor.
     """
 
-    if data_format == 'channels_first':
+    if data_format == "channels_first":
         x = tf.transpose(x, (0, 3, 1, 2))
 
-    if K.floatx() == 'float64':
-        x = tf.cast(x, 'float64')
+    if K.floatx() == "float64":
+        x = tf.cast(x, "float64")
     return x
 
 
@@ -61,17 +61,24 @@ def _preprocess_padding(padding):
     # Raises
         ValueError: if `padding` is invalid.
     """
-    if padding == 'same':
-        padding = 'SAME'
-    elif padding == 'valid':
-        padding = 'VALID'
+    if padding == "same":
+        padding = "SAME"
+    elif padding == "valid":
+        padding = "VALID"
     else:
-        raise ValueError('Invalid padding:', padding)
+        raise ValueError("Invalid padding:", padding)
     return padding
 
 
-def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_first',
-           image_shape=None, filter_shape=None):
+def conv2d(
+    x,
+    kernel,
+    strides=(1, 1),
+    padding="valid",
+    data_format="channels_first",
+    image_shape=None,
+    filter_shape=None,
+):
     """2D convolution.
 
     # Arguments
@@ -94,8 +101,9 @@ def conv2d(x, kernel, strides=(1, 1), padding='valid', data_format='channels_fir
     return K.conv2d(x, kernel, strides, padding, data_format)
 
 
-def extract_image_patches(x, ksizes, ssizes, padding='same',
-                          data_format='channels_last'):
+def extract_image_patches(
+    x, ksizes, ssizes, padding="same", data_format="channels_last"
+):
     """Extract the patches from an image.
 
     # Arguments
@@ -113,17 +121,16 @@ def extract_image_patches(x, ksizes, ssizes, padding='same',
     kernel = [1, ksizes[0], ksizes[1], 1]
     strides = [1, ssizes[0], ssizes[1], 1]
     padding = _preprocess_padding(padding)
-    if data_format == 'channels_first':
+    if data_format == "channels_first":
         x = K.permute_dimensions(x, (0, 2, 3, 1))
     bs_i, w_i, h_i, ch_i = K.int_shape(x)
-    patches = tf.extract_image_patches(x, kernel, strides, [1, 1, 1, 1],
-                                       padding)
+    patches = tf.extract_image_patches(x, kernel, strides, [1, 1, 1, 1], padding)
     # Reshaping to fit Theano
     bs, w, h, ch = K.int_shape(patches)
     reshaped = tf.reshape(patches, [-1, w, h, tf.floordiv(ch, ch_i), ch_i])
     final_shape = [-1, w, h, ch_i, ksizes[0], ksizes[1]]
     patches = tf.reshape(tf.transpose(reshaped, [0, 1, 2, 4, 3]), final_shape)
-    if data_format == 'channels_last':
+    if data_format == "channels_last":
         patches = K.permute_dimensions(patches, [0, 1, 2, 4, 5, 3])
     return patches
 
@@ -151,6 +158,6 @@ def depth_to_space(input, scale, data_format=None):
 
 
 def moments(x, axes, shift=None, keep_dims=False):
-    ''' Wrapper over tensorflow backend call '''
+    """ Wrapper over tensorflow backend call """
 
     return tf.nn.moments(x, axes, shift=shift, keep_dims=keep_dims)

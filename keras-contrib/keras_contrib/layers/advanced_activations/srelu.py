@@ -39,12 +39,15 @@ class SReLU(Layer):
            http://arxiv.org/abs/1512.07030)
     """
 
-    def __init__(self, t_left_initializer='zeros',
-                 a_left_initializer=initializers.RandomUniform(minval=0, maxval=1),
-                 t_right_initializer=initializers.RandomUniform(minval=0, maxval=5),
-                 a_right_initializer='ones',
-                 shared_axes=None,
-                 **kwargs):
+    def __init__(
+        self,
+        t_left_initializer="zeros",
+        a_left_initializer=initializers.RandomUniform(minval=0, maxval=1),
+        t_right_initializer=initializers.RandomUniform(minval=0, maxval=5),
+        a_right_initializer="ones",
+        shared_axes=None,
+        **kwargs
+    ):
         super(SReLU, self).__init__(**kwargs)
         self.supports_masking = True
         self.t_left_initializer = initializers.get(t_left_initializer)
@@ -69,21 +72,21 @@ class SReLU(Layer):
 
         param_shape = tuple(param_shape)
 
-        self.t_left = self.add_weight(shape=param_shape,
-                                      name='t_left',
-                                      initializer=self.t_left_initializer)
+        self.t_left = self.add_weight(
+            shape=param_shape, name="t_left", initializer=self.t_left_initializer
+        )
 
-        self.a_left = self.add_weight(shape=param_shape,
-                                      name='a_left',
-                                      initializer=self.a_left_initializer)
+        self.a_left = self.add_weight(
+            shape=param_shape, name="a_left", initializer=self.a_left_initializer
+        )
 
-        self.t_right = self.add_weight(shape=param_shape,
-                                       name='t_right',
-                                       initializer=self.t_right_initializer)
+        self.t_right = self.add_weight(
+            shape=param_shape, name="t_right", initializer=self.t_right_initializer
+        )
 
-        self.a_right = self.add_weight(shape=param_shape,
-                                       name='a_right',
-                                       initializer=self.a_right_initializer)
+        self.a_right = self.add_weight(
+            shape=param_shape, name="a_right", initializer=self.a_right_initializer
+        )
 
         # Set input spec
         axes = {}
@@ -98,30 +101,27 @@ class SReLU(Layer):
         # ensure the the right part is always to the right of the left
         t_right_actual = self.t_left + K.abs(self.t_right)
 
-        if K.backend() == 'theano':
+        if K.backend() == "theano":
             t_left = K.pattern_broadcast(self.t_left, self.param_broadcast)
             a_left = K.pattern_broadcast(self.a_left, self.param_broadcast)
             a_right = K.pattern_broadcast(self.a_right, self.param_broadcast)
-            t_right_actual = K.pattern_broadcast(t_right_actual,
-                                                 self.param_broadcast)
+            t_right_actual = K.pattern_broadcast(t_right_actual, self.param_broadcast)
         else:
             t_left = self.t_left
             a_left = self.a_left
             a_right = self.a_right
 
-        y_left_and_center = t_left + K.relu(x - t_left,
-                                            a_left,
-                                            t_right_actual - t_left)
+        y_left_and_center = t_left + K.relu(x - t_left, a_left, t_right_actual - t_left)
         y_right = K.relu(x - t_right_actual) * a_right
         return y_left_and_center + y_right
 
     def get_config(self):
         config = {
-            't_left_initializer': self.t_left_initializer,
-            'a_left_initializer': self.a_left_initializer,
-            't_right_initializer': self.t_right_initializer,
-            'a_right_initializer': self.a_right_initializer,
-            'shared_axes': self.shared_axes
+            "t_left_initializer": self.t_left_initializer,
+            "a_left_initializer": self.a_left_initializer,
+            "t_right_initializer": self.t_right_initializer,
+            "a_right_initializer": self.a_right_initializer,
+            "shared_axes": self.shared_axes,
         }
         base_config = super(SReLU, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

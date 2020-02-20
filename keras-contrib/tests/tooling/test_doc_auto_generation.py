@@ -3,7 +3,7 @@ from docs import autogen
 import pytest
 
 test_doc1 = {
-    'doc': """Base class for recurrent layers.
+    "doc": """Base class for recurrent layers.
 
     # Arguments
         cell: A RNN cell instance. A RNN cell is a class that has:
@@ -156,7 +156,7 @@ test_doc1 = {
         y = layer(x)
     ```
     """,
-    'result': '''Base class for recurrent layers.
+    "result": """Base class for recurrent layers.
 
 __Arguments__
 
@@ -323,12 +323,13 @@ x = keras.Input((None, 5))
 layer = RNN(cells)
 y = layer(x)
 ```
-'''}
+""",
+}
 
 
 def test_doc_lists():
-    docstring = autogen.process_docstring(test_doc1['doc'])
-    assert markdown(docstring) == markdown(test_doc1['result'])
+    docstring = autogen.process_docstring(test_doc1["doc"])
+    assert markdown(docstring) == markdown(test_doc1["result"])
 
 
 dummy_docstring = """Multiplies 2 tensors (and/or variables) and returns a *tensor*.
@@ -358,9 +359,9 @@ dummy_docstring = """Multiplies 2 tensors (and/or variables) and returns a *tens
 def test_doc_multiple_sections_code():
     """ Checks that we can have code blocks in multiple sections."""
     generated = autogen.process_docstring(dummy_docstring)
-    assert '# Theano-like behavior example' in generated
-    assert 'def dot(x, y):' in generated
+    assert "# Theano-like behavior example" in generated
+    assert "def dot(x, y):" in generated
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

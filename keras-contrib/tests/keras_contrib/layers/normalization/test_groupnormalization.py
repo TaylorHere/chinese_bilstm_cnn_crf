@@ -16,36 +16,39 @@ input_shapes = [np.ones((10, 10)), np.ones((10, 10, 10))]
 
 
 def test_basic_groupnorm():
-    layer_test(GroupNormalization,
-               kwargs={'groups': 2,
-                       'epsilon': 0.1,
-                       'gamma_regularizer': regularizers.l2(0.01),
-                       'beta_regularizer': regularizers.l2(0.01)},
-               input_shape=(3, 4, 2))
-    layer_test(GroupNormalization,
-               kwargs={'groups': 2,
-                       'epsilon': 0.1,
-                       'axis': 1},
-               input_shape=(3, 4, 2))
-    layer_test(GroupNormalization,
-               kwargs={'groups': 2,
-                       'gamma_initializer': 'ones',
-                       'beta_initializer': 'ones'},
-               input_shape=(3, 4, 2, 4))
-    if K.backend() != 'theano':
-        layer_test(GroupNormalization,
-                   kwargs={'groups': 2,
-                           'axis': 1,
-                           'scale': False,
-                           'center': False},
-                   input_shape=(3, 4, 2, 4))
+    layer_test(
+        GroupNormalization,
+        kwargs={
+            "groups": 2,
+            "epsilon": 0.1,
+            "gamma_regularizer": regularizers.l2(0.01),
+            "beta_regularizer": regularizers.l2(0.01),
+        },
+        input_shape=(3, 4, 2),
+    )
+    layer_test(
+        GroupNormalization,
+        kwargs={"groups": 2, "epsilon": 0.1, "axis": 1},
+        input_shape=(3, 4, 2),
+    )
+    layer_test(
+        GroupNormalization,
+        kwargs={"groups": 2, "gamma_initializer": "ones", "beta_initializer": "ones"},
+        input_shape=(3, 4, 2, 4),
+    )
+    if K.backend() != "theano":
+        layer_test(
+            GroupNormalization,
+            kwargs={"groups": 2, "axis": 1, "scale": False, "center": False},
+            input_shape=(3, 4, 2, 4),
+        )
 
 
 def test_groupnorm_correctness_1d():
     model = Sequential()
     norm = GroupNormalization(input_shape=(10,), groups=2)
     model.add(norm)
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss="mse", optimizer="rmsprop")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 10))
@@ -62,7 +65,7 @@ def test_groupnorm_correctness_2d():
     model = Sequential()
     norm = GroupNormalization(axis=1, input_shape=(10, 6), groups=2)
     model.add(norm)
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss="mse", optimizer="rmsprop")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 10, 6))
@@ -82,7 +85,7 @@ def test_groupnorm_correctness_2d_different_groups():
 
     model = Sequential()
     model.add(norm1)
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss="mse", optimizer="rmsprop")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 10, 6))
@@ -96,7 +99,7 @@ def test_groupnorm_correctness_2d_different_groups():
 
     model = Sequential()
     model.add(norm2)
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss="mse", optimizer="rmsprop")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 10, 6))
@@ -110,7 +113,7 @@ def test_groupnorm_correctness_2d_different_groups():
 
     model = Sequential()
     model.add(norm3)
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss="mse", optimizer="rmsprop")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 10, 6))
@@ -127,13 +130,9 @@ def test_groupnorm_mode_twice():
     # This is a regression test for issue #4881 with the old
     # batch normalization functions in the Theano backend.
     model = Sequential()
-    model.add(GroupNormalization(input_shape=(10, 5, 5),
-                                 axis=1,
-                                 groups=2))
-    model.add(GroupNormalization(input_shape=(10, 5, 5),
-                                 axis=1,
-                                 groups=2))
-    model.compile(loss='mse', optimizer='sgd')
+    model.add(GroupNormalization(input_shape=(10, 5, 5), axis=1, groups=2))
+    model.add(GroupNormalization(input_shape=(10, 5, 5), axis=1, groups=2))
+    model.compile(loss="mse", optimizer="sgd")
 
     x = np.random.normal(loc=5.0, scale=10.0, size=(20, 10, 5, 5))
     model.fit(x, x, epochs=1, verbose=0)
@@ -142,11 +141,9 @@ def test_groupnorm_mode_twice():
 
 def test_groupnorm_convnet():
     model = Sequential()
-    norm = GroupNormalization(axis=1,
-                              input_shape=(3, 4, 4),
-                              groups=3)
+    norm = GroupNormalization(axis=1, input_shape=(3, 4, 4), groups=3)
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 3, 4, 4))
@@ -159,14 +156,14 @@ def test_groupnorm_convnet():
     assert_allclose(np.std(out, axis=(0, 2, 3)), 1.0, atol=1e-1)
 
 
-@pytest.mark.skipif((K.backend() == 'theano'),
-                    reason='Bug with theano backend')
+@pytest.mark.skipif((K.backend() == "theano"), reason="Bug with theano backend")
 def test_groupnorm_convnet_no_center_no_scale():
     model = Sequential()
-    norm = GroupNormalization(axis=-1, center=False, scale=False,
-                              input_shape=(3, 4, 4), groups=2)
+    norm = GroupNormalization(
+        axis=-1, center=False, scale=False, input_shape=(3, 4, 4), groups=2
+    )
     model.add(norm)
-    model.compile(loss='mse', optimizer='sgd')
+    model.compile(loss="mse", optimizer="sgd")
 
     # centered on 5.0, variance 10.0
     x = np.random.normal(loc=5.0, scale=10.0, size=(1000, 3, 4, 4))
@@ -178,9 +175,9 @@ def test_groupnorm_convnet_no_center_no_scale():
 
 
 def test_shared_groupnorm():
-    '''Test that a GN layer can be shared
+    """Test that a GN layer can be shared
     across different data streams.
-    '''
+    """
     # Test single layer reuse
     bn = GroupNormalization(input_shape=(10,), groups=2)
     x1 = Input(shape=(10,))
@@ -192,7 +189,7 @@ def test_shared_groupnorm():
     x = np.random.normal(loc=5.0, scale=10.0, size=(2, 10))
     model = Model(x2, y2)
     assert len(model.updates) == 0
-    model.compile('sgd', 'mse')
+    model.compile("sgd", "mse")
     model.train_on_batch(x, x)
 
     # Test model-level reuse
@@ -200,7 +197,7 @@ def test_shared_groupnorm():
     y3 = model(x3)
     new_model = Model(x3, y3)
     assert len(model.updates) == 0
-    new_model.compile('sgd', 'mse')
+    new_model.compile("sgd", "mse")
     new_model.train_on_batch(x, x)
 
 
@@ -216,7 +213,7 @@ def test_that_trainable_disables_updates():
     model.trainable = False
     assert len(model.updates) == 0
 
-    model.compile('sgd', 'mse')
+    model.compile("sgd", "mse")
     assert len(model.updates) == 0
 
     x1 = model.predict(val_a)
@@ -225,7 +222,7 @@ def test_that_trainable_disables_updates():
     assert_allclose(x1, x2, atol=1e-7)
 
     model.trainable = True
-    model.compile('sgd', 'mse')
+    model.compile("sgd", "mse")
     assert len(model.updates) == 0
 
     model.train_on_batch(val_a, val_out)
@@ -233,7 +230,7 @@ def test_that_trainable_disables_updates():
     assert np.abs(np.sum(x1 - x2)) > 1e-5
 
     layer.trainable = False
-    model.compile('sgd', 'mse')
+    model.compile("sgd", "mse")
     assert len(model.updates) == 0
 
     x1 = model.predict(val_a)
@@ -242,5 +239,5 @@ def test_that_trainable_disables_updates():
     assert_allclose(x1, x2, atol=1e-7)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

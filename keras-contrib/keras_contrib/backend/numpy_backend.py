@@ -2,9 +2,9 @@ import numpy as np
 from keras import backend as K
 
 
-def extract_image_patches(X, ksizes, strides,
-                          padding='valid',
-                          data_format='channels_first'):
+def extract_image_patches(
+    X, ksizes, strides, padding="valid", data_format="channels_first"
+):
     raise NotImplementedError
 
 

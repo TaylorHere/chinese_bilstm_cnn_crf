@@ -17,25 +17,25 @@ class TensorBoardGrouped(TensorBoard):
     The arguments are the same.
     """
 
-    def __init__(self, log_dir='./logs', *args, **kwargs):
+    def __init__(self, log_dir="./logs", *args, **kwargs):
         self.base_log_dir = log_dir
-        self.train_log_dir = os.path.join(log_dir, 'train')
-        self.val_log_dir = os.path.join(log_dir, 'val')
-        super(TensorBoardGrouped, self).__init__(self.train_log_dir,
-                                                 *args,
-                                                 **kwargs)
+        self.train_log_dir = os.path.join(log_dir, "train")
+        self.val_log_dir = os.path.join(log_dir, "val")
+        super(TensorBoardGrouped, self).__init__(self.train_log_dir, *args, **kwargs)
 
     def set_model(self, model):
         super(TensorBoardGrouped, self).set_model(model)
         import tensorflow as tf
+
         self.val_writer = tf.summary.FileWriter(self.val_log_dir)
 
     def _write_logs(self, logs, index):
         import tensorflow as tf
+
         for name, value in logs.items():
-            if name in ['batch', 'size']:
+            if name in ["batch", "size"]:
                 continue
-            if name.startswith('val_'):
+            if name.startswith("val_"):
                 writer = self.val_writer
                 name = name[4:]  # remove val_
             else:

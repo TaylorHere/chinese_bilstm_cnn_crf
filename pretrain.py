@@ -1,4 +1,3 @@
-
 import os
 import argparse
 import logging
@@ -12,7 +11,12 @@ from data_preprocess import DataPreprocess
 from paths import TrainPath
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--corpus_path", help="corpus path", default="/home/jovyan/shared/corpus/2014/", type=str)
+parser.add_argument(
+    "--corpus_path",
+    help="corpus path",
+    default="/home/jovyan/shared/corpus/2014/",
+    type=str,
+)
 parser.add_argument(
     "--train_dir", help="train directory", default="/home/jovyan/shared/", type=str
 )

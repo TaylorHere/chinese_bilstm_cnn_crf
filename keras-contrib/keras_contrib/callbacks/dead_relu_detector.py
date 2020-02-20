@@ -26,7 +26,7 @@ class DeadReluDetector(Callback):
     def is_relu_layer(layer):
         # Should work for all layers with relu
         # activation. Tested for Dense and Conv2D
-        return layer.get_config().get('activation', None) == 'relu'
+        return layer.get_config().get("activation", None) == "relu"
 
     def get_relu_activations(self):
         model_input = self.model.input
@@ -38,15 +38,16 @@ class DeadReluDetector(Callback):
         for index, layer in enumerate(self.model.layers):
             if not layer.get_weights():
                 continue
-            funcs[index] = K.function(model_input
-                                      + [K.learning_phase()], [layer.output])
+            funcs[index] = K.function(
+                model_input + [K.learning_phase()], [layer.output]
+            )
 
         if is_multi_input:
             list_inputs = []
             list_inputs.extend(self.x_train)
-            list_inputs.append(1.)
+            list_inputs.append(1.0)
         else:
-            list_inputs = [self.x_train, 1.]
+            list_inputs = [self.x_train, 1.0]
 
         layer_outputs = {}
         for index, func in funcs.items():
@@ -61,8 +62,10 @@ class DeadReluDetector(Callback):
                 # with kernel and bias, the weights are saved as a list [W, b].
                 # If only weights, it is [W]
                 if type(layer_weight) is not list:
-                    raise ValueError("'Layer_weight' should be a list, "
-                                     "but was {}".format(type(layer_weight)))
+                    raise ValueError(
+                        "'Layer_weight' should be a list, "
+                        "but was {}".format(type(layer_weight))
+                    )
 
                 # there are no weights for current layer; skip it
                 # this is only legitimate if layer is "Activation"
@@ -70,10 +73,7 @@ class DeadReluDetector(Callback):
                     continue
 
                 layer_weight_shape = np.shape(layer_weight[0])
-                yield [layer_index,
-                       layer_activations,
-                       layer_name,
-                       layer_weight_shape]
+                yield [layer_index, layer_activations, layer_name, layer_weight_shape]
 
     def on_epoch_end(self, epoch, logs={}):
         for relu_activation in self.get_relu_activations():
@@ -88,7 +88,7 @@ class DeadReluDetector(Callback):
             act_len = len(shape_act)
 
             # should work for both Conv and Flat
-            if K.image_data_format() == 'channels_last':
+            if K.image_data_format() == "channels_last":
                 # features in last axis
                 axis_filter = -1
             else:
@@ -107,11 +107,10 @@ class DeadReluDetector(Callback):
             dead_neurons = np.sum(np.sum(activation_values, axis=axis) == 0)
 
             dead_neurons_share = float(dead_neurons) / float(total_featuremaps)
-            if ((self.verbose and dead_neurons > 0)
-                    or dead_neurons_share >= self.dead_neurons_share_threshold):
-                str_warning = ('Layer {} (#{}) has {} '
-                               'dead neurons ({:.2%})!').format(layer_name,
-                                                                layer_index,
-                                                                dead_neurons,
-                                                                dead_neurons_share)
+            if (
+                self.verbose and dead_neurons > 0
+            ) or dead_neurons_share >= self.dead_neurons_share_threshold:
+                str_warning = (
+                    "Layer {} (#{}) has {} " "dead neurons ({:.2%})!"
+                ).format(layer_name, layer_index, dead_neurons, dead_neurons_share)
                 print(str_warning)

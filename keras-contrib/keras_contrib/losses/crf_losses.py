@@ -28,7 +28,7 @@ def crf_nll(y_true, y_pred):
     if crf._outbound_nodes:
         raise TypeError('When learn_model="join", CRF must be the last layer.')
     if crf.sparse_target:
-        y_true = K.one_hot(K.cast(y_true[:, :, 0], 'int32'), crf.units)
+        y_true = K.one_hot(K.cast(y_true[:, :, 0], "int32"), crf.units)
     X = crf._inbound_nodes[idx].input_tensors[0]
     mask = crf._inbound_nodes[idx].input_masks[0]
     nloglik = crf.get_negative_log_likelihood(y_true, X, mask)
@@ -52,7 +52,7 @@ def crf_loss(y_true, y_pred):
         add `cc @lzfelix` to notify Luiz Felix.
     """
     crf, idx = y_pred._keras_history[:2]
-    if crf.learn_mode == 'join':
+    if crf.learn_mode == "join":
         return crf_nll(y_true, y_pred)
     else:
         if crf.sparse_target:

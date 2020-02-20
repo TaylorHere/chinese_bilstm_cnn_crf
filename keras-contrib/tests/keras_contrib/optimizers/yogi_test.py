@@ -12,8 +12,6 @@ def test_yogi():
     optimizers._test_optimizer(Yogi(beta_1=0.9, beta_2=0.999))
 
 
-@pytest.mark.skipif(is_tf_keras,
-                    reason='Sometimes fail. It is random.',
-                    strict=True)
+@pytest.mark.skipif(is_tf_keras, reason="Sometimes fail. It is random.", strict=True)
 def test_yogi_change_lr():
     optimizers._test_optimizer(Yogi(beta_1=0.9, beta_2=0.999, lr=0.001))

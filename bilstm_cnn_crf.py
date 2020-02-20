@@ -17,33 +17,34 @@ from keras.layers import TimeDistributed
 from keras.layers import Concatenate
 
 from keras_contrib.layers import CRF
-
+from keras_contrib.losses.crf_losses import crf_loss
+from keras_contrib.metrics.crf_accuracies import crf_viterbi_accuracy, crf_accuracy
 from keras.models import Model
 
 
-def bilstm_cnn_crf(
-    maxlen,
-    useful_word_len,
+def BiLSTM_CNN_CRF(
+    input_length,
+    input_dim,
     class_label_count,
     embedding_size,
     embedding_weights=None,
     is_train=True,
 ):
-    word_input = Input(shape=(maxlen,), dtype="int32", name="word_input")
+    word_input = Input(shape=(input_length,), dtype="int32", name="word_input")
 
     if is_train:
         word_emb = Embedding(
-            useful_word_len,
+            input_dim=input_dim,
             output_dim=embedding_size,
-            input_length=maxlen,
+            input_length=input_length,
             weights=[embedding_weights],
             name="word_emb",
         )(word_input)
     else:
         word_emb = Embedding(
-            useful_word_len,
+            input_dim=input_dim,
             output_dim=embedding_size,
-            input_length=maxlen,
+            input_length=input_length,
             name="word_emb",
         )(word_input)
 
@@ -74,6 +75,6 @@ def bilstm_cnn_crf(
 
     # mdoel
     model = Model(input=[word_input], output=crf_output)
-    model.compile(loss=crf.loss_function, optimizer="adam", metrics=[crf.accuracy])
+    model.compile(loss=crf_loss, optimizer="adam", metrics=[crf_accuracy, crf_viterbi_accuracy])
 
     return model

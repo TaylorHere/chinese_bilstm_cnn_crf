@@ -112,7 +112,7 @@ class SineReLU(Layer):
         return A
 
     def get_config(self):
-        config = {'epsilon': float(self.epsilon)}
+        config = {"epsilon": float(self.epsilon)}
         base_config = super(SineReLU, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

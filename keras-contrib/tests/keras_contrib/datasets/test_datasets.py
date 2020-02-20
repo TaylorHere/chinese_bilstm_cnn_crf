@@ -5,5 +5,5 @@ import random
 from keras_contrib import datasets
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

@@ -16,8 +16,16 @@ CONV_SHAPE = (25, 25, 2, 2)
 SHAPE = (100, 100)
 
 
-def _runner(init, shape, target_mean=None, target_std=None,
-            target_max=None, target_min=None, upper_bound=None, lower_bound=None):
+def _runner(
+    init,
+    shape,
+    target_mean=None,
+    target_std=None,
+    target_max=None,
+    target_min=None,
+    upper_bound=None,
+    lower_bound=None,
+):
     variable = init(shape)
     if not isinstance(variable, np.ndarray):
         output = K.get_value(variable)
@@ -39,7 +47,7 @@ def _runner(init, shape, target_mean=None, target_std=None,
         assert output.min() > lower_bound
 
 
-'''
+"""
 # Example :
 
 @pytest.mark.parametrize('tensor_shape', [FC_SHAPE, CONV_SHAPE], ids=['FC', 'CONV'])
@@ -47,14 +55,16 @@ def test_uniform(tensor_shape):
     _runner(initializations.uniform, tensor_shape, target_mean=0.,
             target_max=0.05, target_min=-0.05)
 
-'''
+"""
 
 
-@pytest.mark.parametrize('tensor_shape', [FC_SHAPE, CONV_SHAPE], ids=['FC', 'CONV'])
+@pytest.mark.parametrize("tensor_shape", [FC_SHAPE, CONV_SHAPE], ids=["FC", "CONV"])
 def test_cai(tensor_shape):
     # upper and lower bounds are proved in original paper
-    _runner(initializers.ConvolutionAware(), tensor_shape,
-            upper_bound=1, lower_bound=-1)
+    _runner(
+        initializers.ConvolutionAware(), tensor_shape, upper_bound=1, lower_bound=-1
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     pytest.main([__file__])
