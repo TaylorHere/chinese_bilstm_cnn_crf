@@ -32,6 +32,8 @@ spec:
       value: T4
     - name: gpu-limits
       value: 1
+    - name: snapshot-id
+      value: imc-2zeiyuxvb2sb2zyg4rre
   volumes:
     - name: workdir
       persistentVolumeClaim:
@@ -128,6 +130,7 @@ spec:
                   annotations:
                     k8s.aliyun.com/eci-gpu-type: "{{workflow.parameters.gpu-type}}"
                     k8s.aliyun.com/eci-image-cache: "true"
+                    k8s.aliyun.com/eci-image-snapshot-id: "{{workflow.parameters.snapshot-id}}"
                   name: trainer-job
                 spec:
                   restartPolicy: Never
