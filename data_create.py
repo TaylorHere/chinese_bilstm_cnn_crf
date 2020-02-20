@@ -5,6 +5,7 @@ Created on Fri May  4 21:38:29 2018
 @author: shen1994
 """
 
+import os
 import re
 import codecs
 import logging
